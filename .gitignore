@@ -4,3 +4,5 @@ __pycache__
 logs
 images/tmp
 .env
+api_server_0.py
+config 0.yaml

@@ -7,6 +7,7 @@ import os
 import threading
 import time
 import yaml
+import pytesseract
 
 lock = threading.Lock()
 
@@ -94,7 +95,7 @@ config_alliance_mobilization = {
         "y": region_alliance_mobilization["defult_location"]["y"], 
     }, 
     "picture_path": f"images/{file_name}.png",
-    "threshold": 0.8,
+    "threshold": 0.7,
     "region": region_alliance_mobilization,
 }
 
@@ -107,10 +108,40 @@ config_alliance_mobilization_window = {
         "y": region_alliance_mobilization_window["defult_location"]["y"], 
     }, 
     "picture_path": f"images/{file_name}.png",
-    "threshold": 0.8,
+    "threshold": 0.7,
     "region": region_alliance_mobilization_window,
 }
 
+file_name = "Zdy_left"
+with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
+    region_Zdy_left = yaml.safe_load(f)
+config_Zdy_left = {
+    "defult_location": {    
+        "x": region_Zdy_left["defult_location"]["x"],
+        "y": region_Zdy_left["defult_location"]["y"], 
+    }, 
+    "picture_path": f"images/{file_name}.png",
+    "threshold": 0.8,
+    "region": region_Zdy_left,
+}
+
+file_name = "refresh_task_button"
+with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
+    region_refresh_task_button = yaml.safe_load(f)
+
+config_refresh_task_button = {
+    "defult_location": {    
+        "x": region_refresh_task_button["defult_location"]["x"],
+        "y": region_refresh_task_button["defult_location"]["y"], 
+        "close_x": region_refresh_task_button["defult_location"]["x"],
+        "close_y": region_refresh_task_button["defult_location"]["y"] + 100,
+        "double_confirm_x": 356,
+        "double_confirm_y": region_refresh_task_button["defult_location"]["y"],
+    }, 
+    "picture_path": f"images/{file_name}.png",
+    "threshold": 0.8,
+    "region": region_refresh_task_button,
+}
 
 class GameController:
     def __init__(self, windwow_controller:WindowsController):
@@ -207,15 +238,113 @@ class GameController:
                 log("联盟总动员窗口已打开")
                 break
         return seccess
-    def RefreshAllianceMobilization_left(self, task_name=None):
+    def RefreshAllianceMobilization(self,location_config, task_name=None):
         """刷新联盟总动员左侧列表"""
         if not self.check_image(config_alliance_mobilization_window["picture_path"], config_alliance_mobilization_window["region"], config_alliance_mobilization_window["threshold"], notify=True, task_name=task_name, real_time_show=False):
             log("当前窗口不是联盟总动员窗口，无法刷新")
             return False
         
+        if self.__AllianceMobilizationIsCooldown(location_config["region"], task_name=task_name):
+            log("联盟总动员任务正在冷却中，无法刷新")
+            return False
+        
+        if self.__AllianceTaskIsDoing(location_config["region"], task_name=task_name):
+            log("联盟任务正在进行中，无法刷新")
+            return False
+        
+        if self.__AllianceMobilizationTaskIs520Or860(location_config["region"], task_name=task_name):
+            log("已经为大拳头不需要刷新")
+            return True
+        
+        self.windwow_controller.tap(location_config["defult_location"]["x"], location_config["defult_location"]["y"])
+        time.sleep(1)
+        if not self.__RefreshTaskButtonExsited(task_name=task_name):
+            log("刷新按钮不存在,关闭刷新窗口")
+            self.windwow_controller.tap(config_refresh_task_button["defult_location"]["close_x"], config_refresh_task_button["defult_location"]["close_y"])
+            time.sleep(1)
+            return False
+        else:
+            log("刷新按钮已存在，点击刷新按钮")
+            self.windwow_controller.tap(config_refresh_task_button["defult_location"]["x"], config_refresh_task_button["defult_location"]["y"])
+            time.sleep(1)
+        self.windwow_controller.tap(config_refresh_task_button["defult_location"]["double_confirm_x"], config_refresh_task_button["defult_location"]["double_confirm_y"])
+        time.sleep(1)
+
+        
+
+        
+    
+    def RefreshAllianceMobilization_left(self, task_name=None):
+        return self.RefreshAllianceMobilization(config_Zdy_left, task_name=task_name)
+
+        
         
         # 点击左侧列表的刷新按钮
         x = 100
+    def __RefreshTaskButtonExsited(self, task_name=None):
+        exsited = self.check_image(config_refresh_task_button["picture_path"], config_refresh_task_button["region"], config_refresh_task_button["threshold"], notify=True, task_name=task_name, real_time_show=False)
+        return exsited
+    
+    def __AllianceTaskIsDoing(self,region, task_name=None):
+        screen = self.windwow_controller.screenshot()
+        cropped_img = screen[region['top']:region['bottom'], region['left']:region['right']]
+        exsited = self.find_image_in_image(cropped_img,"images/alliance_task_coin.png",  0.8)
+        return not exsited
+
+    def __GetAlliaceTaskScore(self,img, task_name=None):
+        OCR_region = {
+            "left": 68 , # 左边界X坐标
+            "top": 140 , # 上边界Y坐标
+            "right": 125 ,# 右边界X坐标
+            "bottom": 160 ,# 下边界Y坐标 
+                }
+        try:
+            OCR_img = img[OCR_region['top']:OCR_region['bottom'], OCR_region['left']:OCR_region['right']]
+            # 转换为灰度图
+            gray = cv2.cvtColor(OCR_img, cv2.COLOR_BGR2GRAY)
+
+            # 二值化处理，使用自适应阈值以提高文字识别率
+            binary = cv2.adaptiveThreshold(
+                gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+                cv2.THRESH_BINARY, 11, 2
+            )
+
+            # 使用OCR识别文字，配置为识别数字和冒号
+            text = pytesseract.image_to_string(
+                binary,
+                config='--psm 7 -c tessedit_char_whitelist=+0123456789:'
+            ).strip()
+            score = int(text)
+            score = score if score > 40 and  score < 2500 else 0
+
+        except Exception as e:
+            
+            log(f"获取联盟任务分数失败: {e}")
+            score = 0
+        return score
+
+    def __AllianceMobilizationTaskIs520Or860(self,region, task_name=None):
+
+        img = self.windwow_controller.screenshot()
+        cropped_img = img[region['top']:region['bottom'], region['left']:region['right']]
+        score = self.__GetAlliaceTaskScore(cropped_img, task_name=task_name)
+        if score == 520 or score == 860:
+            log(f"联盟任务分数为{score}，符合条件")
+            return True
+        elif score == 0:
+            IsTraining = self.check_image("images/zdy_860.png", region, 0.8, notify=True, task_name=task_name, real_time_show=False)
+            if IsTraining:
+                log(f"联盟任务分数为{score}，符合条件")
+                return True
+            else:
+                log(f"联盟任务分数为{score}，不符合条件")
+                return False
+        else:
+            log(f"联盟任务分数为{score}，不符合条件")
+            return False
+
+    def __AllianceMobilizationIsCooldown(self,region, task_name=None):
+        return self.check_image("images/Zdy_cool_down.png", region, 0.8, notify=True, task_name=task_name, real_time_show=False)
 
 
     def check_image(self, template_path, region, threshold=0.8, notify=False, task_name=None,real_time_show = False):
@@ -307,62 +436,77 @@ class GameController:
             traceback.print_exc()
             return False
 
+    def find_image_in_image(self,screen, template_path, threshold=0.8,notify=False, task_name=None):
+        # 检查屏幕截图是否有效
+        if screen is None or screen.size == 0:
+            log("图片无效")
+            return False
+        
+        # 转换为BGR格式（OpenCV默认格式）
+        # screen_bgr = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
+        screen_bgr = screen  # 处理RGBA格式
+        
+        # 读取模板图片
+        template = cv2.imread(template_path)
+        if template is None:
+            log(f"无法读取模板图片: {template_path}")
+            return False
+        
+        # 保存调试图片
+        self.save_image(screen_bgr, 'screen')
+        # self.save_image(template, 'template')
+        
+        # 进行模板匹配
+        result = cv2.matchTemplate(screen_bgr, template, cv2.TM_CCOEFF_NORMED)
+        
+        # 获取最佳匹配位置
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+        log(f"最佳匹配度: {max_val}, 位置: {max_loc}")
+
+        center_x, center_y = 0, 0
+
+        # 计算点击位置（模板中心 + 偏移量）
+        h, w = template.shape[:2]
+        center_x = max_loc[0] + w // 2 
+        center_y = max_loc[1] + h // 2
+
+        find = max_val > threshold
+        if find:
+            # 如果启用了通知
+            if notify:
+                # 保存匹配成功的图片（如果启用了保存）
+                matched_image_path = None
+                if self.save_images:
+                    matched_image_path = self.save_image(screen_bgr, 'matched')
+                
+                task_info = f"\n任务名称: {task_name}" if task_name else ""
+                message = f"图片匹配成功！{task_info}\n匹配度: {max_val:.2f}\n阈值: {threshold}\n点击位置: ({center_x}, {center_y})"
+                # send_notification(message, matched_image_path)
+        else:
+            log(f"未找到匹配图片，最佳匹配度: {max_val}")
+                    
+            
+        return find, center_x, center_y
+
     def find_and_click_image(self, template_path, threshold=0.8, click_offset=(0, 0), notify=False, task_name=None):
         """在屏幕上查找模板图片并点击匹配位置"""
         try:
             # 获取屏幕截图
             screen = self.windwow_controller.screenshot()
             
-            # 检查屏幕截图是否有效
-            if screen is None or screen.size == 0:
-                log("获取屏幕截图失败")
-                return False
-            
-            # 转换为BGR格式（OpenCV默认格式）
-            # screen_bgr = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
-            screen_bgr = screen  # 处理RGBA格式
-            
-            # 读取模板图片
-            template = cv2.imread(template_path)
-            if template is None:
-                log(f"无法读取模板图片: {template_path}")
-                return False
-            
-            # 保存调试图片
-            self.save_image(screen_bgr, 'screen')
-            # self.save_image(template, 'template')
-            
-            # 进行模板匹配
-            result = cv2.matchTemplate(screen_bgr, template, cv2.TM_CCOEFF_NORMED)
-            
-            # 获取最佳匹配位置
-            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-            log(f"最佳匹配度: {max_val}, 位置: {max_loc}")
+            exsited, center_x, center_y = self.find_image_in_image(screen, template_path, threshold=threshold,notify=notify, task_name=task_name)
             
             # 如果匹配度超过阈值，点击匹配位置
-            if max_val > threshold:
+            if exsited:
                 # 计算点击位置（模板中心 + 偏移量）
-                h, w = template.shape[:2]
-                center_x = max_loc[0] + w // 2 + click_offset[0]
-                center_y = max_loc[1] + h // 2 + click_offset[1]
-                
-                # 如果启用了通知
-                if notify:
-                    # 保存匹配成功的图片（如果启用了保存）
-                    matched_image_path = None
-                    if self.save_images:
-                        matched_image_path = self.save_image(screen_bgr, 'matched')
-                    
-                    task_info = f"\n任务名称: {task_name}" if task_name else ""
-                    message = f"图片匹配成功！{task_info}\n匹配度: {max_val:.2f}\n阈值: {threshold}\n点击位置: ({center_x}, {center_y})"
-                    # send_notification(message, matched_image_path)
-                
+                click_x = center_x + click_offset[0]
+                click_y = center_y+ click_offset[1]
+
                 # 点击位置
-                self.windwow_controller.tap(center_x, center_y)
-                log(f"点击位置: ({center_x}, {center_y})")
+                self.windwow_controller.tap(click_x, click_y)
+                log(f"点击位置: ({click_x}, {click_y})")
                 return True
             else:
-                log(f"未找到匹配图片，最佳匹配度: {max_val}")
                 return False
             
         except Exception as e:
@@ -407,5 +551,7 @@ if __name__ == "__main__":
     game_controller.ReturnToCity()
     game_controller.OpenRoutineTask()
     game_controller.OpenAlliance_mobilization()
+    game_controller.RefreshAllianceMobilization_left()
     # game_controller.find_and_click_image(config_alliance_mobilization["picture_path"], config_alliance_mobilization["threshold"], notify=False, task_name=None)
-    
+
+
