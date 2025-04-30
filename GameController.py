@@ -124,6 +124,18 @@ config_Zdy_left = {
     "threshold": 0.8,
     "region": region_Zdy_left,
 }
+file_name = "Zdy_right"
+with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
+    region_Zdy_right = yaml.safe_load(f)
+config_Zdy_right = {
+    "defult_location": {    
+        "x": region_Zdy_right["defult_location"]["x"],
+        "y": region_Zdy_right["defult_location"]["y"], 
+    }, 
+    "picture_path": f"images/{file_name}.png",
+    "threshold": 0.8,
+    "region": region_Zdy_right,
+}
 
 file_name = "refresh_task_button"
 with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
@@ -271,7 +283,8 @@ class GameController:
         time.sleep(1)
 
         
-
+    def RefreshAllianceMobilization_right(self, task_name=None):
+        return self.RefreshAllianceMobilization(config_Zdy_right, task_name=task_name)
         
     
     def RefreshAllianceMobilization_left(self, task_name=None):
@@ -552,6 +565,7 @@ if __name__ == "__main__":
     game_controller.OpenRoutineTask()
     game_controller.OpenAlliance_mobilization()
     game_controller.RefreshAllianceMobilization_left()
+    game_controller.RefreshAllianceMobilization_right()
     # game_controller.find_and_click_image(config_alliance_mobilization["picture_path"], config_alliance_mobilization["threshold"], notify=False, task_name=None)
 
 
