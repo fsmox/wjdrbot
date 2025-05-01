@@ -168,6 +168,33 @@ config_return_button = {
     "region": region_return_button,
 }
 
+
+file_name = "alliance_icon"
+with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
+    region_alliance_icon = yaml.safe_load(f)
+config_alliance_icon = {
+    "defult_location": {    
+        "x": region_alliance_icon["defult_location"]["x"],
+        "y": region_alliance_icon["defult_location"]["y"], 
+    }, 
+    "picture_path": f"images/{file_name}.png",
+    "threshold": 0.8,
+    "region": region_alliance_icon,
+}
+
+file_name = "alliance_window"
+with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
+    region_alliance_window = yaml.safe_load(f)
+config_alliance_window = {
+    "defult_location": {    
+        "x": region_alliance_window["defult_location"]["x"],
+        "y": region_alliance_window["defult_location"]["y"], 
+    }, 
+    "picture_path": f"images/{file_name}.png",
+    "threshold": 0.65,
+    "region": region_alliance_window,
+}
+
 class GameController:
     def __init__(self, windwow_controller:WindowsController):
         self.windwow_controller = windwow_controller
@@ -388,6 +415,84 @@ class GameController:
         return self.check_image("images/Zdy_cool_down.png", region, 0.8, notify=True, task_name=task_name, real_time_show=False)
 
 
+    def __IsAllianceWindow(self, task_name=None):
+        exsited = self.check_image(config_alliance_window["picture_path"], config_alliance_window["region"], config_alliance_window["threshold"], notify=True, task_name=task_name, real_time_show=False)
+        return exsited
+    def __AllianceIconExsited(self, task_name=None):
+        exsited = self.check_image(config_alliance_icon["picture_path"], config_alliance_icon["region"], config_alliance_icon["threshold"], notify=True, task_name=task_name, real_time_show=False)
+        return exsited
+    def OpenAllianceWindow(self, task_name=None):
+        if not self.__AllianceIconExsited(task_name=task_name):
+            self.ClikReturnButton(task_name=task_name)
+        
+        if not self.__AllianceIconExsited(task_name=task_name):
+            log("联盟图标不存在，无法打开联盟窗口")
+            return False
+        
+        self.windwow_controller.tap(config_alliance_icon["defult_location"]["x"], config_alliance_icon["defult_location"]["y"])
+        time.sleep(1)
+        seccess = False
+        for i in range(Operation_interval):
+            time.sleep(1)
+            log(f"第{i+1}次检查联盟窗口")
+            task_found = self.__IsAllianceWindow(task_name=task_name)
+            if task_found:
+                log("联盟窗口已打开")
+                seccess = True
+                break
+        
+        return seccess
+    def OpenAllianceTechnologyWindow(self, task_name=None):
+        """打开联盟科技窗口"""
+        if not self.__IsAllianceWindow(task_name=task_name):
+            log("当前窗口不是联盟窗口，无法打开联盟科技窗口")
+            return False
+        
+        self.windwow_controller.tap(374,650)
+        time.sleep(1)
+        return True
+    def CloseAllianceWindow(self, task_name=None):
+        self.windwow_controller.tap(config_return_button["defult_location"]["x"],config_return_button["defult_location"]["y"])
+        return True
+
+    def CloseAllianceTechnologyWindow(self, task_name=None):
+        self.windwow_controller.tap(config_return_button["defult_location"]["x"],config_return_button["defult_location"]["y"])
+        return True
+    
+    def ClickAllianceTechnologyRecommendButton(self, task_name=None):
+        """点击推荐按钮"""
+        config_alliance_technology_recommend_icon = {
+            "picture_path": "images/alliance_technology_recommend.png",
+            "threshold": 0.8,
+        }
+        screen = self.windwow_controller.screenshot()
+        # 检查屏幕截图是否有效
+        if screen is None or screen.size == 0:
+            log("获取屏幕截图失败")
+            return False
+        exsited,x,y = self.find_image_in_image(screen, config_alliance_technology_recommend_icon["picture_path"], config_alliance_technology_recommend_icon["threshold"], notify=True, task_name=task_name)
+        if not exsited:
+            log("大拇指选项不存在")
+            return False
+        with lock:
+            self.windwow_controller.tap(x, y)
+        time.sleep(1)
+        self.windwow_controller.long_press(374,714,5000)
+        self.windwow_controller.tap(config_return_button["defult_location"]["x"],config_return_button["defult_location"]["y"])
+
+        return True
+
+
+    def Task_AllianceTechnology(self):
+        self.ReturnToCity()
+        self.OpenAllianceWindow()
+        self.OpenAllianceTechnologyWindow()
+        self.ClickAllianceTechnologyRecommendButton()
+        self.CloseAllianceTechnologyWindow()
+        self.CloseAllianceWindow()
+
+        return True
+
     def check_image(self, template_path, region, threshold=0.8, notify=False, task_name=None,real_time_show = False):
         """检查指定区域是否匹配模板图片，使用自定义阈值"""
         try:
@@ -481,7 +586,7 @@ class GameController:
         # 检查屏幕截图是否有效
         if screen is None or screen.size == 0:
             log("图片无效")
-            return False
+            return False, 0, 0
         
         # 转换为BGR格式（OpenCV默认格式）
         # screen_bgr = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
@@ -491,7 +596,7 @@ class GameController:
         template = cv2.imread(template_path)
         if template is None:
             log(f"无法读取模板图片: {template_path}")
-            return False
+            return False , 0, 0
         
         # 保存调试图片
         self.save_image(screen_bgr, 'screen')
@@ -594,6 +699,7 @@ if __name__ == "__main__":
             time.sleep(1)
             game_controller.ClosePopup()
             time.sleep(1)
-            game_controller.Task_RefreshAllianceMobilization()
+            # game_controller.Task_RefreshAllianceMobilization()
+            game_controller.Task_AllianceTechnology()
         time.sleep(60*5)  # 每5分钟执行一次
 
