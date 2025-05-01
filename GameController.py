@@ -155,6 +155,19 @@ config_refresh_task_button = {
     "region": region_refresh_task_button,
 }
 
+file_name = "return_button"
+with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
+    region_return_button = yaml.safe_load(f)
+config_return_button = {
+    "defult_location": {    
+        "x": region_return_button["defult_location"]["x"],
+        "y": region_return_button["defult_location"]["y"], 
+    }, 
+    "picture_path": f"images/{file_name}.png",
+    "threshold": 0.8,
+    "region": region_return_button,
+}
+
 class GameController:
     def __init__(self, windwow_controller:WindowsController):
         self.windwow_controller = windwow_controller
@@ -209,7 +222,23 @@ class GameController:
             return defult_x,defult_y
         
         self.find_and_click_image()
+
+    def ClikReturnButton(self, task_name=None):
+        """点击返回按钮"""
         
+        with lock:
+            existed = self.check_image(config_return_button["picture_path"], config_return_button["region"], config_return_button["threshold"], notify=True, task_name=task_name, real_time_show=False)
+            if not existed:
+                log("返回按钮不存在")
+                return False
+            self.windwow_controller.tap(config_return_button["defult_location"]["x"], config_return_button["defult_location"]["y"])
+            
+        return True
+
+    def CloseRoutineTask(self, task_name=None):
+        return self.ClikReturnButton(task_name=task_name)
+
+
     def NowWindowIsRoutineTask(self):
         return self.check_image(config_RutineTask_return["picture_path"], config_RutineTask_return["region"], config_RutineTask_return["threshold"], notify=True, task_name="常规活动返回按钮", real_time_show=False)
 
@@ -260,7 +289,8 @@ class GameController:
             log("联盟总动员任务正在冷却中，无法刷新")
             return False
         
-        if self.__AllianceTaskIsDoing(location_config["region"], task_name=task_name):
+        TaskOnGoing = self.__AllianceTaskIsDoing(location_config["region"], task_name=task_name)
+        if TaskOnGoing:
             log("联盟任务正在进行中，无法刷新")
             return False
         
@@ -290,10 +320,15 @@ class GameController:
     def RefreshAllianceMobilization_left(self, task_name=None):
         return self.RefreshAllianceMobilization(config_Zdy_left, task_name=task_name)
 
-        
-        
-        # 点击左侧列表的刷新按钮
-        x = 100
+    def Task_RefreshAllianceMobilization(self):
+        self.ReturnToCity()
+        self.OpenRoutineTask()
+        self.OpenAlliance_mobilization()
+        self.RefreshAllianceMobilization_left()
+        self.RefreshAllianceMobilization_right()
+        self.CloseRoutineTask()
+
+        return None    
     def __RefreshTaskButtonExsited(self, task_name=None):
         exsited = self.check_image(config_refresh_task_button["picture_path"], config_refresh_task_button["region"], config_refresh_task_button["threshold"], notify=True, task_name=task_name, real_time_show=False)
         return exsited
@@ -301,7 +336,7 @@ class GameController:
     def __AllianceTaskIsDoing(self,region, task_name=None):
         screen = self.windwow_controller.screenshot()
         cropped_img = screen[region['top']:region['bottom'], region['left']:region['right']]
-        exsited = self.find_image_in_image(cropped_img,"images/alliance_task_coin.png",  0.8)
+        exsited = self.find_image_in_image(cropped_img,"images/alliance_task_coin.png",  0.8)[0]
         return not exsited
 
     def __GetAlliaceTaskScore(self,img, task_name=None):
@@ -341,17 +376,10 @@ class GameController:
         img = self.windwow_controller.screenshot()
         cropped_img = img[region['top']:region['bottom'], region['left']:region['right']]
         score = self.__GetAlliaceTaskScore(cropped_img, task_name=task_name)
-        if score == 520 or score == 860:
+        IsTraining = self.check_image("images/zdy_860.png", region, 0.9, notify=True, task_name=task_name, real_time_show=False)
+        if (score == 520 or score == 860) and IsTraining:
             log(f"联盟任务分数为{score}，符合条件")
             return True
-        elif score == 0:
-            IsTraining = self.check_image("images/zdy_860.png", region, 0.8, notify=True, task_name=task_name, real_time_show=False)
-            if IsTraining:
-                log(f"联盟任务分数为{score}，符合条件")
-                return True
-            else:
-                log(f"联盟任务分数为{score}，不符合条件")
-                return False
         else:
             log(f"联盟任务分数为{score}，不符合条件")
             return False
@@ -553,19 +581,19 @@ class GameController:
         
 if __name__ == "__main__":
     # 示例用法
-    window_controller = WindowsController()
-    game_controller = GameController(window_controller)
+    game_controller_list = []
+    for _ in range(1):
+        window_controller = WindowsController()
+        game_controller = GameController(window_controller)
+        game_controller_list.append(game_controller)
     
-    # 测试函数
-    # game_controller.Reconnect()
-    # time.sleep(1)
-    # game_controller.ClosePopup()
-    # time.sleep(1)
-    game_controller.ReturnToCity()
-    game_controller.OpenRoutineTask()
-    game_controller.OpenAlliance_mobilization()
-    game_controller.RefreshAllianceMobilization_left()
-    game_controller.RefreshAllianceMobilization_right()
-    # game_controller.find_and_click_image(config_alliance_mobilization["picture_path"], config_alliance_mobilization["threshold"], notify=False, task_name=None)
-
+    while True:
+        for game_controller in game_controller_list:
+            # 测试函数
+            game_controller.Reconnect()
+            time.sleep(1)
+            game_controller.ClosePopup()
+            time.sleep(1)
+            game_controller.Task_RefreshAllianceMobilization()
+        time.sleep(60*5)  # 每5分钟执行一次
 
