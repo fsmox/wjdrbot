@@ -683,23 +683,353 @@ class GameController:
         except Exception as e:
             log(f"保存调试图片失败: {e}")
             return None
-        
-if __name__ == "__main__":
-    # 示例用法
-    game_controller_list = []
-    for _ in range(1):
-        window_controller = WindowsController()
-        game_controller = GameController(window_controller)
-        game_controller_list.append(game_controller)
+
+class ImageJudge:
+    def __init__(self, config):
+        self.image_path = config.get("picture_path",None)
+        self.region = config.get("region",None)
+        self.defult_location = config.get("defult_click_point",None)
+        self.method = config.get("method",None)
+        self.threshold = config.get("threshold",0.8)
+        self.save_images = config.get("save_images",True)
+        self.save_path = config.get("save_path","images/tmp")
+
+    def Existed(self, screen):
+
+        existed = False
+        center_x = 0
+        center_y = 0
+        if self.method is None or self.method == "None":
+            if self.defult_location is not None:
+                existed = True
+                center_x = self.defult_location["x"]
+                center_y = self.defult_location["y"]
+            else:
+                existed = False
+
+        if self.method == "check" or self.method == "swipe_check":
+            existed = self.check_image(screen)
+            center_x = (self.region['left'] + self.region['right']) // 2
+            center_y = (self.region['top'] + self.region['bottom']) // 2
+        elif self.method == "find" or self.method == "swipe_find":
+            existed, center_x, center_y = self.find_image_in_image(screen)
+
+        return existed, center_x, center_y
     
-    while True:
-        for game_controller in game_controller_list:
-            # 测试函数
-            game_controller.Reconnect()
+
+    def check_image(self, screen, real_time_show=False, notify=False, task_name=None):
+        """检查指定区域是否匹配模板图片，使用自定义阈值"""
+
+        region = self.region
+        template_path = self.image_path
+        threshold = self.threshold
+
+        try:
+            # 检查区域坐标是否有效
+            screen_height, screen_width = screen.shape[:2]
+            if (region['left'] < 0 or region['top'] < 0 or 
+                region['right'] > screen_width or region['bottom'] > screen_height or
+                region['left'] >= region['right'] or region['top'] >= region['bottom']):
+                log(f"区域坐标无效: {region}, 屏幕大小: {screen_width}x{screen_height}")
+                return False
+            
+            # 裁剪感兴趣区域
+            try:
+                roi = screen[region['top']:region['bottom'], region['left']:region['right']]
+                if roi.size == 0:
+                    log("裁剪区域为空")
+                    return False
+            except Exception as e:
+                log(f"裁剪区域出错: {e}")
+                return False
+            if real_time_show: 
+                # 使用matplotlib显示ROI
+                import matplotlib.pyplot as plt
+                plt.imshow(roi)
+                plt.title("Region of Interest (ROI)")
+                plt.show()
+            # 转换为BGR格式（OpenCV默认格式）
+            try:
+                # roi_bgr = cv2.cvtColor(roi, cv2.COLOR_RGB2BGR)
+                roi_bgr = roi  # 处理RGBA格式
+            except Exception as e:
+                log(f"颜色空间转换出错: {e}")
+                return False
+            
+            # 保存裁剪区域的图片（用于调试）
+            self.save_image(roi_bgr, 'cropped')
+            
+            # 读取模板图片
+            template = cv2.imread(template_path)
+            if template is None:
+                log(f"无法读取模板图片: {template_path}")
+                return False
+            
+            # 检查两个图像的形状和类型是否匹配
+            if roi_bgr.shape != template.shape:
+                log(f"图像形状不匹配: ROI {roi_bgr.shape}, 模板 {template.shape}")
+                return False
+            
+            if roi_bgr.dtype != template.dtype:
+                log(f"图像类型不匹配: ROI {roi_bgr.dtype}, 模板 {template.dtype}")
+                template = template.astype(roi_bgr.dtype)
+            
+            # 进行模板匹配
+            try:
+                result = cv2.matchTemplate(roi_bgr, template, cv2.TM_CCOEFF_NORMED)
+                min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+                log(f"模板匹配度: {max_val}, 阈值: {threshold}")
+                
+                # 如果匹配成功且启用了通知
+                if max_val > threshold and notify:
+                    # 保存匹配成功的图片（如果启用了保存）
+                    matched_image_path = None
+                    if self.save_images:
+                        matched_image_path = self.save_image(roi_bgr, 'matched')
+                    
+                    # 发送通知
+                    task_info = f"\n任务名称: {task_name}" if task_name else ""
+                    message = f"图片匹配成功！{task_info}\n匹配度: {max_val:.2f}\n阈值: {threshold}\n区域: {region}"
+                    # send_notification(message, matched_image_path)
+                
+                return max_val > threshold
+            except Exception as e:
+                log(f"模板匹配出错: {e}")
+                return False
+        
+        except Exception as e:
+            log(f"图片匹配过程中出现未知错误: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+
+    def find_image_in_image(self,screen, template_path=None, threshold=None,notify=False, task_name=None):
+        template_path = template_path if template_path else self.image_path
+        threshold = threshold if threshold else self.threshold
+        # 检查屏幕截图是否有效
+        if screen is None or screen.size == 0:
+            log("图片无效")
+            return False, 0, 0
+        
+        # 转换为BGR格式（OpenCV默认格式）
+        # screen_bgr = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
+        screen_bgr = screen  # 处理RGBA格式
+        
+        # 读取模板图片
+        template = cv2.imread(template_path)
+        if template is None:
+            log(f"无法读取模板图片: {template_path}")
+            return False , 0, 0
+        
+        # 保存调试图片
+        self.save_image(screen_bgr, 'screen')
+        # self.save_image(template, 'template')
+        
+        # 进行模板匹配
+        result = cv2.matchTemplate(screen_bgr, template, cv2.TM_CCOEFF_NORMED)
+        
+        # 获取最佳匹配位置
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+        log(f"最佳匹配度: {max_val}, 位置: {max_loc}")
+
+        center_x, center_y = 0, 0
+
+        # 计算点击位置（模板中心 + 偏移量）
+        h, w = template.shape[:2]
+        center_x = max_loc[0] + w // 2 
+        center_y = max_loc[1] + h // 2
+
+        find = max_val > threshold
+        if find:
+            # 如果启用了通知
+            if notify:
+                # 保存匹配成功的图片（如果启用了保存）
+                matched_image_path = None
+                if self.save_images:
+                    matched_image_path = self.save_image(screen_bgr, 'matched')
+                
+                task_info = f"\n任务名称: {task_name}" if task_name else ""
+                message = f"图片匹配成功！{task_info}\n匹配度: {max_val:.2f}\n阈值: {threshold}\n点击位置: ({center_x}, {center_y})"
+                # send_notification(message, matched_image_path)
+        else:
+            log(f"未找到匹配图片，最佳匹配度: {max_val}")
+                    
+            
+        return find, center_x, center_y
+    def save_image(self, image, prefix='cropped'):
+        """保存图片到指定目录"""
+        # 如果未启用图片保存，直接返回
+        if not self.save_images:
+            return None
+        
+        try:
+            # 确保保存目录存在
+            if not os.path.exists(self.save_path):
+                os.makedirs(self.save_path)
+            
+            # 生成文件名，包含时间戳
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f'{self.save_path}/{prefix}_{timestamp}.png'
+            
+            # 保存图片
+            cv2.imwrite(filename, image)
+            log(f"调试图片已保存: {filename}")
+            return filename
+        except Exception as e:
+            log(f"保存调试图片失败: {e}")
+            return None
+
+
+class GameWindow:
+    def __init__(self,window_name,open_config,in_window_config,cool_down_config, windwow_controller: WindowsController):
+        self.windwow_controller = windwow_controller
+        self.window_name = window_name
+        self.father_window = None
+        self.child_windows = {}
+        self.open_config = open_config
+        self.in_window_config = in_window_config
+        self.cool_down_config = cool_down_config
+
+    def CurrentWindowIsMe(self):
+        """判断当前窗口是否是我"""
+        # 获取屏幕截图
+        screen = self.windwow_controller.screenshot()
+        # 检查屏幕截图是否有效
+        if screen is None or screen.size == 0:
+            log("获取屏幕截图失败")
+            return False
+        
+        judge = ImageJudge(self.in_window_config)
+        # 检查当前窗口是否是我
+        existed,x,y = judge.Existed(screen)
+        return existed
+
+    def CurrentWindowIsFather(self):
+        """判断当前窗口是否是父窗口"""
+        if self.father_window is None:
+            return False
+        return self.father_window.CurrentWindowIsMe()
+
+    def open(self):
+        # # 打开游戏窗口的逻辑
+        # if not self.CurrentWindowIsFather():
+        #     log("当前窗口不是父窗口，无法打开游戏窗口")
+        #     return False
+
+        judge = ImageJudge(self.open_config)
+
+        if judge.method == "swipe_check" or judge.method == "swipe_find":
+            for i in range(3):
+                log(f"第{i+1}次检查{self.window_name}窗口")
+                existed,x,y = judge.Existed(self.windwow_controller.screenshot())
+                if existed:
+                    break
+                start_x = self.open_config["swipe"]["start"]["x"]
+                start_y = self.open_config["swipe"]["start"]["y"]
+                end_x = self.open_config["swipe"]["end"]["x"]
+                end_y = self.open_config["swipe"]["end"]["y"]
+                duration = self.open_config["swipe"]["duration"]
+                self.windwow_controller.swipe(start_x, start_y, end_x, end_y, duration)
+                time.sleep(1)
+                # 先滑动到窗口位置
+            if not existed:
+                existed,x,y = judge.Existed(self.windwow_controller.screenshot())
+            
+        else:
+            existed,x,y = judge.Existed(self.windwow_controller.screenshot())
+        
+        if not existed:
+            log(f"没检测到{self.window_name}窗口打开图标，无法打开{self.window_name}窗口")
+            return False
+        
+
+        self.windwow_controller.tap(x,y)
+        for i in range(Operation_interval):
             time.sleep(1)
-            game_controller.ClosePopup()
-            time.sleep(1)
-            # game_controller.Task_RefreshAllianceMobilization()
-            game_controller.Task_AllianceTechnology()
-        time.sleep(60*5)  # 每5分钟执行一次
+            log(f"第{i+1}次检查游戏窗口")
+            task_found = self.CurrentWindowIsMe()
+            if task_found:
+                log(f"{self.window_name}窗口已打开")
+                break
+
+        time.sleep(1)
+
+    def return_to_father_window(self):
+        pass
+
+    
+GameWindows = {}
+def RegisterWindow(windows_config,window_controller=None):
+    """注册窗口"""
+    global GameWindows
+    if window_controller is None:
+        window_controller = WindowsController()
+    for window_name,config in windows_config.items():
+        in_window_config = f"images/{window_name}_window_config.yaml"
+        open_config = f"images/{window_name}_open_config.yaml"
+        cool_down_config = f"images/{window_name}_cool_down_config.yaml"
+        if not config  is None:
+            in_window_config = config.get("in_window_config",in_window_config)
+            open_config = config.get("open_config",open_config)
+
+        if os.path.exists(in_window_config) and os.path.exists(open_config):
+            with open(in_window_config, 'r', encoding='utf-8') as f:
+                in_window_config = yaml.safe_load(f)
+            with open(open_config, 'r', encoding='utf-8') as f:
+                open_config = yaml.safe_load(f)
+            
+            if os.path.exists(cool_down_config):
+                with open(cool_down_config, 'r', encoding='utf-8') as f:
+                    cool_down_config = yaml.safe_load(f)
+            else:
+                cool_down_config = None
+            GameWindows[window_name] = GameWindow(window_name,open_config,in_window_config,cool_down_config,window_controller)
+        else:
+            log(f"窗口配置文件不存在: {in_window_config} 或 {open_config}")
+            continue
+
+    return GameWindows
+
+if __name__ == "__main__":
+    GameWindows_test = {
+        "city":None,
+        "world":None,
+        "left_window":None,
+        "warehouse_rewards":None,
+    }
+ 
+    RegisterWindow(GameWindows_test)
+
+    if not GameWindows["city"].CurrentWindowIsMe():
+        GameWindows["city"].open()
+    GameWindows["world"].open()
+    GameWindows["left_window"].open()
+    GameWindows["warehouse_rewards"].open()
+
+
+    # RegisterWindow(GameWindows_test)
+
+    # # 示例用法
+    # game_controller_list = []
+    # for _ in range(2):
+    #     window_controller = WindowsController()
+    #     game_controller = GameController(window_controller)
+    #     game_controller_list.append(game_controller)
+    
+    # time_minute = 0
+    # while True:
+    #     time_minute +=5
+
+    #     for game_controller in game_controller_list:
+    #         # 测试函数
+    #         game_controller.Reconnect()
+    #         time.sleep(1)
+    #         game_controller.ClosePopup()
+    #         time.sleep(1)
+    #         if time_minute % 5 == 0:
+    #             pass
+    #             # game_controller.Task_RefreshAllianceMobilization()
+    #         if time_minute %120 == 0:
+    #             game_controller.Task_AllianceTechnology()
+    #     time.sleep(60*5)  
 

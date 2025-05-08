@@ -1,0 +1,20 @@
+defult_click_point:
+  x: 78
+  y: 190
+method: check
+picture_path: images/left_window_window.png
+region:
+  bottom: 208
+  left: 6
+  right: 150
+  top: 172
+swipe:
+  duration: 0.5
+  end:
+    x: 0
+    y: 0
+  start:
+    x: 0
+    y: 0
+threshold: 0.8
+window_name: left_window_window
