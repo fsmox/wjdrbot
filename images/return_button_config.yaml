@@ -1,7 +1,20 @@
-bottom: 48
-defult_location:
-  x: 26
-  y: 26
-left: 4
-right: 54
-top: 6
+defult_click_point:
+  x: 31
+  y: 24
+method: check
+picture_path: images/return_button.png
+region:
+  bottom: 44
+  left: 4
+  right: 58
+  top: 4
+swipe:
+  duration: 0.5
+  end:
+    x: 162
+    y: 300
+  start:
+    x: 160
+    y: 540
+threshold: 0.8
+window_name: return_button

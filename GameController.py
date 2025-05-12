@@ -121,7 +121,7 @@ config_Zdy_left = {
         "y": region_Zdy_left["defult_location"]["y"], 
     }, 
     "picture_path": f"images/{file_name}.png",
-    "threshold": 0.8,
+    "threshold": 0.6,
     "region": region_Zdy_left,
 }
 file_name = "Zdy_right"
@@ -133,7 +133,7 @@ config_Zdy_right = {
         "y": region_Zdy_right["defult_location"]["y"], 
     }, 
     "picture_path": f"images/{file_name}.png",
-    "threshold": 0.8,
+    "threshold": 0.6,
     "region": region_Zdy_right,
 }
 
@@ -160,12 +160,12 @@ with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
     region_return_button = yaml.safe_load(f)
 config_return_button = {
     "defult_location": {    
-        "x": region_return_button["defult_location"]["x"],
-        "y": region_return_button["defult_location"]["y"], 
+        "x": region_return_button["defult_click_point"]["x"],
+        "y": region_return_button["defult_click_point"]["y"], 
     }, 
     "picture_path": f"images/{file_name}.png",
     "threshold": 0.8,
-    "region": region_return_button,
+    "region": region_return_button["region"],
 }
 
 
@@ -355,7 +355,7 @@ class GameController:
         self.RefreshAllianceMobilization_right()
         self.CloseRoutineTask()
 
-        return None    
+        return 2*60    
     def __RefreshTaskButtonExsited(self, task_name=None):
         exsited = self.check_image(config_refresh_task_button["picture_path"], config_refresh_task_button["region"], config_refresh_task_button["threshold"], notify=True, task_name=task_name, real_time_show=False)
         return exsited
@@ -403,7 +403,7 @@ class GameController:
         img = self.windwow_controller.screenshot()
         cropped_img = img[region['top']:region['bottom'], region['left']:region['right']]
         score = self.__GetAlliaceTaskScore(cropped_img, task_name=task_name)
-        IsTraining = self.check_image("images/zdy_860.png", region, 0.9, notify=True, task_name=task_name, real_time_show=False)
+        IsTraining = self.check_image("images/zdy_860.png", region, 0.8, notify=True, task_name=task_name, real_time_show=False)
         if (score == 520 or score == 860) and IsTraining:
             log(f"联盟任务分数为{score}，符合条件")
             return True
@@ -480,7 +480,7 @@ class GameController:
         self.windwow_controller.long_press(374,714,5000)
         self.windwow_controller.tap(config_return_button["defult_location"]["x"],config_return_button["defult_location"]["y"])
 
-        return True
+        return 5*60
 
 
     def Task_AllianceTechnology(self):
@@ -491,7 +491,7 @@ class GameController:
         self.CloseAllianceTechnologyWindow()
         self.CloseAllianceWindow()
 
-        return True
+        return 2*60*60
 
     def check_image(self, template_path, region, threshold=0.8, notify=False, task_name=None,real_time_show = False):
         """检查指定区域是否匹配模板图片，使用自定义阈值"""
@@ -685,14 +685,19 @@ class GameController:
             return None
 
 class ImageJudge:
-    def __init__(self, config):
+    def __init__(self, config,name=None):
         self.image_path = config.get("picture_path",None)
         self.region = config.get("region",None)
         self.defult_location = config.get("defult_click_point",None)
         self.method = config.get("method",None)
         self.threshold = config.get("threshold",0.8)
         self.save_images = config.get("save_images",True)
-        self.save_path = config.get("save_path","images/tmp")
+        if name is None:
+            self.save_path = config.get("save_path","images/tmp")
+            self.label_path = config.get("label_path",None)
+        else:
+            self.save_path = config.get("save_path",f"AI_Data/images/{name}")
+            self.label_path = config.get("label_path",f"AI_Data/labels/{name}")
 
     def Existed(self, screen):
 
@@ -716,6 +721,85 @@ class ImageJudge:
 
         return existed, center_x, center_y
     
+    def get_countdown_time(self,screen, region=None):
+        """识别屏幕上的倒计时时间，支持多种格式"""
+        try:
+            if region is None:
+                region = self.region
+            # 裁剪倒计时区域
+            roi = screen[region['top']:region['bottom'], region['left']:region['right']]
+            
+            # 转换为灰度图
+            gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+            
+            # 二值化处理，使用自适应阈值以提高文字识别率
+            binary = cv2.adaptiveThreshold(
+                gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+                cv2.THRESH_BINARY, 11, 2
+            )
+            
+            # 使用OCR识别文字，配置为识别数字和冒号
+            text = pytesseract.image_to_string(
+                binary,
+                config='--psm 7 -c tessedit_char_whitelist=0123456789:'
+            ).strip()
+            
+            log(f"识别到的原始倒计时文本: {text}")
+            
+            # 保存识别区域的图片（用于调试）
+            self.save_image(binary, 'countdown')
+            
+            # 清理文本，只保留数字和冒号
+            cleaned_text = ''.join(char for char in text if char.isdigit() or char == ':')
+            log(f"清理后的文本: {cleaned_text}")
+            
+            # 处理不同格式的时间字符串
+            if ':' in cleaned_text:
+                # 处理包含冒号的格式 (HH:MM:SS 或 MM:SS)
+                parts = cleaned_text.split(':')
+                if len(parts) == 3:
+                    # HH:MM:SS 格式
+                    hours = int(parts[0])
+                    minutes = int(parts[1])
+                    seconds = int(parts[2])
+                elif len(parts) == 2:
+                    # MM:SS 格式
+                    hours = 0
+                    minutes = int(parts[0])
+                    seconds = int(parts[1])
+                else:
+                    log(f"无效的时间格式: {cleaned_text}")
+                    return None
+            else:
+                # 处理无冒号的纯数字格式
+                if len(cleaned_text) == 6:
+                    # HHMMSS 格式
+                    hours = int(cleaned_text[:2])
+                    minutes = int(cleaned_text[2:4])
+                    seconds = int(cleaned_text[4:])
+                elif len(cleaned_text) == 4:
+                    # MMSS 格式
+                    hours = 0
+                    minutes = int(cleaned_text[:2])
+                    seconds = int(cleaned_text[2:])
+                else:
+                    log(f"无法解析的时间格式: {cleaned_text}")
+                    return None
+            
+            # 验证时间值的合理性
+            if hours >= 0 and minutes >= 0 and minutes < 60 and seconds >= 0 and seconds < 60:
+                total_seconds = hours * 3600 + minutes * 60 + seconds
+                log(f"解析倒计时: {hours}时{minutes}分{seconds}秒，共{total_seconds}秒")
+                return total_seconds
+            else:
+                log(f"时间值超出范围: {hours}:{minutes}:{seconds}")
+                return None
+            
+        except Exception as e:
+            log(f"倒计时识别失败: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
 
     def check_image(self, screen, real_time_show=False, notify=False, task_name=None):
         """检查指定区域是否匹配模板图片，使用自定义阈值"""
@@ -780,18 +864,18 @@ class ImageJudge:
                 min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
                 log(f"模板匹配度: {max_val}, 阈值: {threshold}")
                 
-                # 如果匹配成功且启用了通知
-                if max_val > threshold and notify:
-                    # 保存匹配成功的图片（如果启用了保存）
-                    matched_image_path = None
-                    if self.save_images:
-                        matched_image_path = self.save_image(roi_bgr, 'matched')
-                    
-                    # 发送通知
-                    task_info = f"\n任务名称: {task_name}" if task_name else ""
-                    message = f"图片匹配成功！{task_info}\n匹配度: {max_val:.2f}\n阈值: {threshold}\n区域: {region}"
-                    # send_notification(message, matched_image_path)
-                
+
+                center_x = (region['left'] + region['right']) / 2 / screen_width
+                center_y = (region['top'] + region['bottom']) / 2 / screen_height
+                lable_h = (region['bottom'] - region['top']) / screen_height
+                lable_w = (region['right'] - region['left']) / screen_width
+                lable_str = f"{center_x:.2f} {center_y:.2f} {lable_w:.2f} {lable_h:.2f}"
+
+                prefix = "matched" if max_val > threshold else "unmatched"
+                prefix = f"{prefix}_{max_val:.2f}"
+
+                if self.save_images:
+                    matched_image_path = self.save_image(roi_bgr, prefix=prefix, image_lable=lable_str)
                 return max_val > threshold
             except Exception as e:
                 log(f"模板匹配出错: {e}")
@@ -839,15 +923,21 @@ class ImageJudge:
         center_x = max_loc[0] + w // 2 
         center_y = max_loc[1] + h // 2
 
+        screen_height, screen_width = screen.shape[:2]
+        lable_center_x = center_x / screen_width
+        lable_center_y = center_y / screen_height
+        lable_h = h / screen_height
+        lable_w = w / screen_width
+
+        lable_str = f"{lable_center_x:.2f} {lable_center_y:.2f} {lable_w:.2f} {lable_h:.2f}"
+
         find = max_val > threshold
         if find:
+            
+            if self.save_images:
+                matched_image_path = self.save_image(screen_bgr, f'matched_{max_val:.2f}', image_lable=lable_str)
             # 如果启用了通知
-            if notify:
-                # 保存匹配成功的图片（如果启用了保存）
-                matched_image_path = None
-                if self.save_images:
-                    matched_image_path = self.save_image(screen_bgr, 'matched')
-                
+            if notify:                
                 task_info = f"\n任务名称: {task_name}" if task_name else ""
                 message = f"图片匹配成功！{task_info}\n匹配度: {max_val:.2f}\n阈值: {threshold}\n点击位置: ({center_x}, {center_y})"
                 # send_notification(message, matched_image_path)
@@ -856,7 +946,7 @@ class ImageJudge:
                     
             
         return find, center_x, center_y
-    def save_image(self, image, prefix='cropped'):
+    def save_image(self, image, prefix='cropped', image_lable=None):
         """保存图片到指定目录"""
         # 如果未启用图片保存，直接返回
         if not self.save_images:
@@ -874,6 +964,18 @@ class ImageJudge:
             # 保存图片
             cv2.imwrite(filename, image)
             log(f"调试图片已保存: {filename}")
+
+            if image_lable is not None:
+                # 保存标签文件
+                if not os.path.exists(self.label_path):
+                    os.makedirs(self.label_path)
+
+                label_filename = f'{self.label_path}/{prefix}_{timestamp}.txt'
+                with open(label_filename, 'w') as f:
+                    f.write(image_lable)
+                log(f"标签文件已保存: {label_filename}")
+
+            
             return filename
         except Exception as e:
             log(f"保存调试图片失败: {e}")
@@ -899,10 +1001,28 @@ class GameWindow:
             log("获取屏幕截图失败")
             return False
         
-        judge = ImageJudge(self.in_window_config)
+        judge = ImageJudge(self.in_window_config,f"{self.window_name}_in_window")
         # 检查当前窗口是否是我
         existed,x,y = judge.Existed(screen)
         return existed
+
+    def ClikReturnButton(self, task_name=None):
+        window_name = "return_button"
+        in_window_config_file = f"images/{window_name}_config.yaml"
+        with open(in_window_config_file, 'r', encoding='utf-8') as f:
+            in_window_config = yaml.safe_load(f)
+        # return_button = GameWindow(window_name, None, in_window_config, None, self.windwow_controller)
+        judge = ImageJudge(in_window_config,f"{self.window_name}_in_window")
+        screen = self.windwow_controller.screenshot()
+        existed,x,y = judge.Existed(screen)
+        if existed:
+            log(f"点击{window_name}按钮")
+            self.windwow_controller.tap(x,y)
+            time.sleep(1)
+            return True
+        else:
+            log(f"{window_name}按钮不存在")
+            return False
 
     def CurrentWindowIsFather(self):
         """判断当前窗口是否是父窗口"""
@@ -910,13 +1030,31 @@ class GameWindow:
             return False
         return self.father_window.CurrentWindowIsMe()
 
+    def GetCoolDownTime(self):
+        """获取冷却时间"""
+        default_cool_down_time = 60 * 10 # 默认冷却时间为10分钟
+        if self.cool_down_config is None:
+            return default_cool_down_time # 默认冷却时间为10分钟
+        # 获取屏幕截图
+        screen = self.windwow_controller.screenshot()
+        # 检查屏幕截图是否有效
+        if screen is None or screen.size == 0:
+            log("获取屏幕截图失败")
+            return default_cool_down_time # 默认冷却时间为10分钟
+        
+        judge = ImageJudge(self.cool_down_config)
+        total_seconds = judge.get_countdown_time(screen)
+
+        return total_seconds if total_seconds is not None else default_cool_down_time
+        # 获取冷却时间的逻辑
+
     def open(self):
         # # 打开游戏窗口的逻辑
         # if not self.CurrentWindowIsFather():
         #     log("当前窗口不是父窗口，无法打开游戏窗口")
         #     return False
 
-        judge = ImageJudge(self.open_config)
+        judge = ImageJudge(self.open_config,f"{self.window_name}_open")
 
         if judge.method == "swipe_check" or judge.method == "swipe_find":
             for i in range(3):
@@ -957,11 +1095,14 @@ class GameWindow:
     def return_to_father_window(self):
         pass
 
+
     
-GameWindows = {}
-def RegisterWindow(windows_config,window_controller=None):
+
+def RegisterWindow(windows_config,window_controller=None,GameWindows=None):
     """注册窗口"""
-    global GameWindows
+    if GameWindows is None:
+        GameWindows = {}
+
     if window_controller is None:
         window_controller = WindowsController()
     for window_name,config in windows_config.items():
@@ -990,6 +1131,62 @@ def RegisterWindow(windows_config,window_controller=None):
 
     return GameWindows
 
+def GoToCity(GameWindows):
+    """返回城市"""
+    city = GameWindows["city"]
+
+    if city.CurrentWindowIsMe():
+        log("已经在城市窗口")
+        return True
+    
+    city.open()
+    
+    if city.CurrentWindowIsMe():
+        log("返回城市成功")
+        return True
+    
+    # 尝试点击返回按钮
+    for i in range(5):
+        city.ClikReturnButton()
+        if city.CurrentWindowIsMe():
+            log("返回城市成功")
+            return True
+        city.open()
+        if city.CurrentWindowIsMe():
+            log("返回城市成功")
+            return True
+    
+    x, y = city.open_config["defult_click_point"]["x"], city.open_config["defult_click_point"]["y"]
+    city.windwow_controller.tap(x,y)
+    time.sleep(1)
+    if city.CurrentWindowIsMe():
+        log("返回城市成功")
+        return True
+    city.open()
+
+    if city.CurrentWindowIsMe():
+        log("返回城市成功")
+        return True
+    else:
+        log("返回城市失败")
+        return False
+
+
+def Task_WarehouseRewards(GameWindows):
+    """领取仓库奖励"""
+
+    defult_count_down = 5*60
+    if not GameWindows["city"].CurrentWindowIsMe():
+        GameWindows["city"].open()
+    GameWindows["world"].open()
+    GameWindows["left_window"].open()
+    GameWindows["warehouse_rewards"].open()
+    conunt_down = GameWindows["warehouse_rewards"].GetCoolDownTime()
+    GoToCity(GameWindows)
+    
+    log(f"冷却时间: {conunt_down}秒")
+    return conunt_down
+
 if __name__ == "__main__":
     GameWindows_test = {
         "city":None,
@@ -999,12 +1196,9 @@ if __name__ == "__main__":
     }
  
     RegisterWindow(GameWindows_test)
+    GoToCity()
+    # Task_WarehouseRewards()
 
-    if not GameWindows["city"].CurrentWindowIsMe():
-        GameWindows["city"].open()
-    GameWindows["world"].open()
-    GameWindows["left_window"].open()
-    GameWindows["warehouse_rewards"].open()
 
 
     # RegisterWindow(GameWindows_test)
