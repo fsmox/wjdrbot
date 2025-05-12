@@ -841,7 +841,7 @@ class ImageJudge:
                 return False
             
             # 保存裁剪区域的图片（用于调试）
-            self.save_image(roi_bgr, 'cropped')
+            self.save_image(roi_bgr, 'cropped',save_path="images/tmp")
             
             # 读取模板图片
             template = cv2.imread(template_path)
@@ -875,7 +875,7 @@ class ImageJudge:
                 prefix = f"{prefix}_{max_val:.2f}"
 
                 if self.save_images:
-                    matched_image_path = self.save_image(roi_bgr, prefix=prefix, image_lable=lable_str)
+                    matched_image_path = self.save_image(screen, prefix=prefix, image_lable=lable_str)
                 return max_val > threshold
             except Exception as e:
                 log(f"模板匹配出错: {e}")
@@ -906,7 +906,7 @@ class ImageJudge:
             return False , 0, 0
         
         # 保存调试图片
-        self.save_image(screen_bgr, 'screen')
+        # self.save_image(screen_bgr, 'screen')
         # self.save_image(template, 'template')
         
         # 进行模板匹配
@@ -946,20 +946,23 @@ class ImageJudge:
                     
             
         return find, center_x, center_y
-    def save_image(self, image, prefix='cropped', image_lable=None):
+    def save_image(self, image, prefix='cropped', image_lable=None,save_path=None): 
         """保存图片到指定目录"""
         # 如果未启用图片保存，直接返回
         if not self.save_images:
             return None
         
+        if save_path is None:
+            save_path = self.save_path
+
         try:
             # 确保保存目录存在
-            if not os.path.exists(self.save_path):
-                os.makedirs(self.save_path)
+            if not os.path.exists(save_path):
+                os.makedirs(save_path)
             
             # 生成文件名，包含时间戳
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            filename = f'{self.save_path}/{prefix}_{timestamp}.png'
+            filename = f'{save_path}/{prefix}_{timestamp}.png'
             
             # 保存图片
             cv2.imwrite(filename, image)
