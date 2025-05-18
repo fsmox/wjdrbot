@@ -217,15 +217,16 @@ class GameController:
         }
         self.GameWindows = RegisterWindow(GameWindows_test,window_controller=self.windwow_controller)
 
-    def RegisterWindow(self, window_name):
+    def RegisterWindow(self, window_name,config=None):
         """注册窗口"""
         if window_name in self.GameWindows:
             log(f"窗口 {window_name} 已经注册")
-            return False
+            
         else:
-            RegisterWindow({window_name:None}, window_controller=self.windwow_controller, GameWindows=self.GameWindows)
+            RegisterWindow({window_name:config}, window_controller=self.windwow_controller, GameWindows=self.GameWindows)
             log(f"窗口 {window_name} 注册成功")
-            return True
+        
+        return self.GameWindows[window_name]
 
     def Reconnect(self,task_name=None):
         return self.find_and_click_image(config_reconnect["picture_path"], config_reconnect["threshold"], notify=True, task_name=task_name)
@@ -573,6 +574,22 @@ class GameController:
             GameWindows[window_name].open()
             if not GameWindows[window_name].CurrentWindowIsMe():
                 log(f"木材采集窗口{window_name}未打开")
+                return 60*2
+    def Task_meat_collection(self):
+        self.GoToCity()
+        GameWindows = self.GameWindows
+        GameWindows["world"].open()
+        
+        if not "meat_collection_Step7" in GameWindows:
+            meat_collection_window = {}
+            for i in range(1,8):
+                meat_collection_window[f"meat_collection_Step{i}"] = None
+            RegisterWindow(meat_collection_window, window_controller=self.windwow_controller, GameWindows=self.GameWindows)
+        for i in range(1,8):
+            window_name = f"meat_collection_Step{i}"
+            GameWindows[window_name].open()
+            if not GameWindows[window_name].CurrentWindowIsMe():
+                log(f"生肉采集窗口{window_name}未打开")
                 return 60*2
 
     def GoToCity(self):

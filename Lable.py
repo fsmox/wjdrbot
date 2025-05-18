@@ -109,11 +109,11 @@ window_radio.grid(row=8, column=1, sticky="w")
 def save_Lable(label_img, box, swipe_config =None):
 
     
-    window_name = task_entry_task_name.get()
+    task_name = task_entry_task_name.get()
     step = step_entry.get()
     # 判断 open_radio 还是 window_radio 被选中
     click_type = click_mode_var.get()
-
+    window_name = f"{task_name}_{step}"
     if not window_name:
         print("请先输入任务名")
         return
@@ -163,7 +163,19 @@ def save_Lable(label_img, box, swipe_config =None):
         yaml.dump(config, file, default_flow_style=False)
 
 
+def clear_swipe_config():
+    global last_swipe_config
+    global swipe_arrow, swipe_time_label
+    last_swipe_config = None
+    if swipe_arrow[0]:
+        canvas.delete(swipe_arrow[0])
+        swipe_arrow[0] = None
+    if swipe_time_label[0]:
+        swipe_time_label[0].destroy()
+        swipe_time_label[0] = None
+
 def clear_boxes_and_previews():
+
     for box in bounding_boxes:
         canvas.delete(box)
     bounding_boxes.clear()
@@ -172,13 +184,22 @@ def clear_boxes_and_previews():
         label.destroy()
     preview_labels.clear()
 
+def on_right_click(event):
+    if event.num == 3:  # 右键清除
+        clear_boxes_and_previews()
+        clear_swipe_config()
+        return
+    if mode_var.get() == "manual":
+        return  # 手动模式下不响应自动检测
+
 def on_click(event):
+    if event.num == 3:  # 右键清除
+        clear_boxes_and_previews(event)
+        return
     if mode_var.get() == "manual":
         return  # 手动模式下不响应自动检测
     x, y = int(event.x), int(event.y)
-    if event.num == 3:  # 右键清除
-        clear_boxes_and_previews()
-        return
+
     label_id = labeled[y, x]
     if label_id == 0:
         print("点击区域没有目标")
@@ -275,22 +296,101 @@ def bind_canvas_events(*args):
     canvas.unbind("<B1-Motion>")
     canvas.unbind("<ButtonRelease-1>")
     if mode_var.get() == "manual":
-        # 手动模式绑定画框相关
         canvas.bind("<ButtonPress-1>", on_canvas_press)
         canvas.bind("<B1-Motion>", on_canvas_drag)
         canvas.bind("<ButtonRelease-1>", on_canvas_release)
-        canvas.bind("<Button-3>", on_click)  # 右键清除
+
+    elif mode_var.get() == "swipe":
+        canvas.bind("<ButtonPress-1>", on_swipe_press)
+        canvas.bind("<B1-Motion>", on_swipe_motion)
+        canvas.bind("<ButtonRelease-1>", on_swipe_release)
+
     else:
-        # 自动模式绑定点击检测
         canvas.bind("<Button-1>", on_click)
-        canvas.bind("<Button-3>", on_click)  # 右键清除
+    
+    canvas.bind("<Button-3>", on_right_click)
 
 # 绑定模式切换事件
 mode_menu.bind("<<ComboboxSelected>>", bind_canvas_events)
 # 初始化时也绑定一次
 bind_canvas_events()
 
+# 在mode_menu中添加swipe选项
+mode_menu["values"] = ["auto", "manual", "swipe"]
+
+# swipe模式相关变量
+swipe_start = [None, None]
+swipe_end = [None, None]
+swipe_arrow = [None]
+swipe_time = [None]
+swipe_time_label = [None]
+
+def on_swipe_press(event):
+    if mode_var.get() != "swipe":
+        return
+    clear_swipe_config()
+    swipe_start[0], swipe_start[1] = event.x, event.y
+    swipe_end[0], swipe_end[1] = None, None
+    swipe_time[0] = cv2.getTickCount()
+
+last_swipe_config = None
+def on_swipe_release(event):
+    if mode_var.get() != "swipe" or swipe_start[0] is None:
+        return
+    swipe_end[0], swipe_end[1] = event.x, event.y
+    time_end = cv2.getTickCount()
+    duration = (time_end - swipe_time[0]) / cv2.getTickFrequency()
+    # 画箭头
+    if swipe_arrow[0]:
+        canvas.delete(swipe_arrow[0])
+    swipe_arrow[0] = canvas.create_line(
+        swipe_start[0], swipe_start[1], swipe_end[0], swipe_end[1],
+        arrow=tk.LAST, fill="green", width=3
+    )
+    # 显示滑动时间
+    if swipe_time_label[0]:
+        swipe_time_label[0].destroy()
+    swipe_time_label[0] = tk.Label(root, text=f"滑动时间: {duration:.2f}s", fg="green")
+    swipe_time_label[0].grid(row=8, column=2, sticky="w")
+    # 保存swipe参数到全局变量，供保存时使用
+    global last_swipe_config
+    last_swipe_config = {
+        "start": {"x": int(swipe_start[0]), "y": int(swipe_start[1])},
+        "end": {"x": int(swipe_end[0]), "y": int(swipe_end[1])},
+        "duration": float(f"{duration:.2f}")*1000,  # 转换为毫秒
+    }
+
+
+def on_swipe_motion(event):
+    if mode_var.get() != "swipe" or swipe_start[0] is None:
+        return
+    # 动态画线
+    if swipe_arrow[0]:
+        canvas.delete(swipe_arrow[0])
+    swipe_arrow[0] = canvas.create_line(
+        swipe_start[0], swipe_start[1], event.x, event.y,
+        arrow=tk.LAST, fill="green", width=2, dash=(2, 2)
+    )
+
+
+
+# 保存swipe参数
+last_swipe_config = None
+
+# # 修改on_save_button_click，保存swipe参数
+# def on_save_button_click():
+#     if not bounding_boxes:
+#         print("请先选择一个区域")
+#         return
+#     box_id = bounding_boxes[-1]
+#     x1, y1, x2, y2 = map(int, canvas.coords(box_id))
+#     swipe_config = last_swipe_config if mode_var.get() == "swipe" else None
+#     save_Lable(img_rgb, (x1, y1, x2, y2), swipe_config=swipe_config)
+
 from GameController import GameController
+import glob
+import os
+import re
 
 
 def test_data():
@@ -308,5 +408,30 @@ def test_data():
 
 test_button = tk.Button(root, text="数据测试", command=test_data)
 test_button.grid(row=9, column=2, sticky="w")
+
+
+def test_dataset():
+    # 遍历 images 目录下所有 *_config.yaml 文件，依次测试
+    window_name = task_entry_task_name.get()
+    step = step_entry.get()
+    match = re.search(r'\d+', step)
+    if match:
+        step_num = match.group()
+    else:
+        step_num = ""
+    step_num = int(step_num)
+
+    game_controller = GameController(windwow_controller=controller)
+    
+    for i in range(1,step_num+1):
+        window_name_step = f"{window_name}_Step{i}"
+        window = game_controller.RegisterWindow(window_name_step)
+        window.open()
+        if not window.CurrentWindowIsMe():
+            print(f"{window_name_step}打开失败")
+            return
+
+dataset_test_button = tk.Button(root, text="数据集测试", command=test_dataset)
+dataset_test_button.grid(row=10, column=2, sticky="w")
 
 root.mainloop()

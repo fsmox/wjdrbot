@@ -2,7 +2,7 @@ defult_click_point:
   x: 283
   y: 640
 method: find
-picture_path: images/wood_collection_Step2_open.png
+picture_path: images/meat_collection_Step2_open.png
 region:
   bottom: 677
   left: 239
@@ -10,4 +10,4 @@ region:
   top: 603
 swipe: null
 threshold: 0.8
-window_name: wood_collection
+window_name: meat_collection_Step2
