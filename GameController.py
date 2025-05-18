@@ -196,13 +196,36 @@ config_alliance_window = {
 }
 
 class GameController:
-    def __init__(self, windwow_controller:WindowsController):
-        self.windwow_controller = windwow_controller
+    def __init__(self, windwow_controller:WindowsController=None):
+        if windwow_controller is None:
+            self.windwow_controller = WindowsController()
+        else:
+            self.windwow_controller = windwow_controller
         self.game_state = "initial"
         self.player_score = 0
         self.level = 1
         self.save_images = save_images  # 是否保存图片
         self.save_path = "images/tmp"
+        self.set_game_windows()
+
+    def set_game_windows(self):
+        GameWindows_test = {
+            "city":None,
+            "world":None,
+            "left_window":None,
+            "warehouse_rewards":None,
+        }
+        self.GameWindows = RegisterWindow(GameWindows_test,window_controller=self.windwow_controller)
+
+    def RegisterWindow(self, window_name):
+        """注册窗口"""
+        if window_name in self.GameWindows:
+            log(f"窗口 {window_name} 已经注册")
+            return False
+        else:
+            RegisterWindow({window_name:None}, window_controller=self.windwow_controller, GameWindows=self.GameWindows)
+            log(f"窗口 {window_name} 注册成功")
+            return True
 
     def Reconnect(self,task_name=None):
         return self.find_and_click_image(config_reconnect["picture_path"], config_reconnect["threshold"], notify=True, task_name=task_name)
@@ -492,6 +515,107 @@ class GameController:
         self.CloseAllianceWindow()
 
         return 2*60*60
+    
+    def Task_AdventureRewards(self):
+        """领取探险奖励"""
+
+        click_point_list = [
+            {"x": 44, "y": 848},
+            {"x": 428, "y": 640},
+            {"x": 240, "y": 640},
+            {"x": 240, "y": 640},
+        ]
+
+        GameWindows = self.GameWindows
+        defult_count_down = 60 * 60 * 2  # 默认冷却时间为10分钟
+        city = GameWindows["city"]
+        if not city.CurrentWindowIsMe():
+            city.open()
+        
+        for point in click_point_list:
+            x, y = point["x"], point["y"]
+            city.windwow_controller.tap(x, y)
+            time.sleep(2)
+
+        self.GoToCity()
+        return defult_count_down
+    
+    def Task_WarehouseRewards(self):
+        """领取仓库奖励"""
+        GameWindows = self.GameWindows
+        defult_count_down = 5*60
+        city = GameWindows["city"]
+        if not city.CurrentWindowIsMe():
+            city.open()
+        GameWindows["world"].open()
+        GameWindows["left_window"].open()
+        GameWindows["warehouse_rewards"].open()
+        conunt_down = GameWindows["warehouse_rewards"].GetCoolDownTime()
+        x, y = city.open_config["defult_click_point"]["x"], city.open_config["defult_click_point"]["y"]
+        city.windwow_controller.tap(x,y)
+        self.GoToCity()
+        
+        log(f"冷却时间: {conunt_down}秒")
+        return conunt_down
+    
+    def Task_wood_collection(self):
+        self.GoToCity()
+        GameWindows = self.GameWindows
+        GameWindows["world"].open()
+        
+        if not "wood_collection_Step7" in GameWindows:
+            wood_collection_window = {}
+            for i in range(1,8):
+                wood_collection_window[f"wood_collection_Step{i}"] = None
+            RegisterWindow(wood_collection_window, window_controller=self.windwow_controller, GameWindows=self.GameWindows)
+        for i in range(1,8):
+            window_name = f"wood_collection_Step{i}"
+            GameWindows[window_name].open()
+            if not GameWindows[window_name].CurrentWindowIsMe():
+                log(f"木材采集窗口{window_name}未打开")
+                return 60*2
+
+    def GoToCity(self):
+        """返回城市"""
+
+        GameWindows = self.GameWindows
+        city = GameWindows["city"]
+
+        if city.CurrentWindowIsMe():
+            log("已经在城市窗口")
+            return True
+        
+        city.open()
+        
+        if city.CurrentWindowIsMe():
+            log("返回城市成功")
+            return True
+        
+        # 尝试点击返回按钮
+        for i in range(5):
+            city.ClikReturnButton()
+            if city.CurrentWindowIsMe():
+                log("返回城市成功")
+                return True
+            city.open()
+            if city.CurrentWindowIsMe():
+                log("返回城市成功")
+                return True
+        
+        x, y = city.open_config["defult_click_point"]["x"], city.open_config["defult_click_point"]["y"]
+        city.windwow_controller.tap(x,y)
+        time.sleep(1)
+        if city.CurrentWindowIsMe():
+            log("返回城市成功")
+            return True
+        city.open()
+
+        if city.CurrentWindowIsMe():
+            log("返回城市成功")
+            return True
+        else:
+            log("返回城市失败")
+            return False
 
     def check_image(self, template_path, region, threshold=0.8, notify=False, task_name=None,real_time_show = False):
         """检查指定区域是否匹配模板图片，使用自定义阈值"""
@@ -1134,72 +1258,23 @@ def RegisterWindow(windows_config,window_controller=None,GameWindows=None):
 
     return GameWindows
 
-def GoToCity(GameWindows):
-    """返回城市"""
-    city = GameWindows["city"]
-
-    if city.CurrentWindowIsMe():
-        log("已经在城市窗口")
-        return True
-    
-    city.open()
-    
-    if city.CurrentWindowIsMe():
-        log("返回城市成功")
-        return True
-    
-    # 尝试点击返回按钮
-    for i in range(5):
-        city.ClikReturnButton()
-        if city.CurrentWindowIsMe():
-            log("返回城市成功")
-            return True
-        city.open()
-        if city.CurrentWindowIsMe():
-            log("返回城市成功")
-            return True
-    
-    x, y = city.open_config["defult_click_point"]["x"], city.open_config["defult_click_point"]["y"]
-    city.windwow_controller.tap(x,y)
-    time.sleep(1)
-    if city.CurrentWindowIsMe():
-        log("返回城市成功")
-        return True
-    city.open()
-
-    if city.CurrentWindowIsMe():
-        log("返回城市成功")
-        return True
-    else:
-        log("返回城市失败")
-        return False
 
 
-def Task_WarehouseRewards(GameWindows):
-    """领取仓库奖励"""
 
-    defult_count_down = 5*60
-    if not GameWindows["city"].CurrentWindowIsMe():
-        GameWindows["city"].open()
-    GameWindows["world"].open()
-    GameWindows["left_window"].open()
-    GameWindows["warehouse_rewards"].open()
-    conunt_down = GameWindows["warehouse_rewards"].GetCoolDownTime()
-    GoToCity(GameWindows)
-    
-    log(f"冷却时间: {conunt_down}秒")
-    return conunt_down
+
 
 if __name__ == "__main__":
-    GameWindows_test = {
-        "city":None,
-        "world":None,
-        "left_window":None,
-        "warehouse_rewards":None,
-    }
+    game_controller = GameController()
+    game_controller.Task_wood_collection()
+    # GameWindows_test = {
+    #     "city":None,
+    #     "world":None,
+    #     "left_window":None,
+    #     "warehouse_rewards":None,
+    # }
  
-    RegisterWindow(GameWindows_test)
-    GoToCity()
+    # RegisterWindow(GameWindows_test)
+    # GoToCity()
     # Task_WarehouseRewards()
 
 

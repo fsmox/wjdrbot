@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 384
+  y: 310
+method: check
+picture_path: images/wood_collection_Step6_window.png
+region:
+  bottom: 404
+  left: 331
+  right: 438
+  top: 217
+swipe: null
+threshold: 0.8
+window_name: wood_collection

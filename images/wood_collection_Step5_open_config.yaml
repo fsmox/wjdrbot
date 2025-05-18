@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 300
+  y: 225
+method: None
+picture_path: images/wood_collection_Step5_open.png
+region:
+  bottom: 242
+  left: 285
+  right: 315
+  top: 209
+swipe: null
+threshold: 0.8
+window_name: wood_collection

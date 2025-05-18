@@ -1,4 +1,3 @@
-from GameController import Task_WarehouseRewards
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -59,17 +58,12 @@ if __name__ == "__main__":
     window_controller2 = WindowsController()
     GameController_test2 = GameController(window_controller2)
     exe_list = []
-    GameWindows_test = {
-        "city":None,
-        "world":None,
-        "left_window":None,
-        "warehouse_rewards":None,
-    }
- 
-    GameWindows1 = RegisterWindow(GameWindows_test,window_controller=window_controller)
-    GoToCity(GameWindows1)
-    GameWindows2 = RegisterWindow(GameWindows_test,window_controller=window_controller2)
-    GoToCity(GameWindows2)
+
+
+    # GameWindows1 = RegisterWindow(GameWindows_test,window_controller=window_controller)
+    GameController_test.GoToCity()
+    # GameWindows2 = RegisterWindow(GameWindows_test,window_controller=window_controller2)
+    GameController_test2.GoToCity()
     # Create a scheduler instance
     executors = {
     'default': ThreadPoolExecutor(1)  # 限制只能一个任务同时执行
@@ -78,18 +72,24 @@ if __name__ == "__main__":
     # Create an instance of the task_executor with the test_task
 
     
-    executor_Task_WarehouseRewards = task_executor(scheduler,Task_WarehouseRewards,GameWindows1)
+    game_controller = GameController_test 
+    executor_Task_WarehouseRewards = task_executor(scheduler,game_controller.Task_WarehouseRewards)
     exe_list.append(executor_Task_WarehouseRewards)
-    exe = task_executor(scheduler,GameController_test.Task_AllianceTechnology)
+    exe = task_executor(scheduler,game_controller.Task_AllianceTechnology)
     exe_list.append(exe)
-    exe = task_executor(scheduler,GameController_test.Task_RefreshAllianceMobilization)
+    exe = task_executor(scheduler,game_controller.Task_RefreshAllianceMobilization)
+    exe_list.append(exe)
+    exe = task_executor(scheduler,game_controller.Task_AdventureRewards)
     exe_list.append(exe)
 
-    executor_Task_WarehouseRewards = task_executor(scheduler,Task_WarehouseRewards,GameWindows2)
+    game_controller = GameController_test2
+    executor_Task_WarehouseRewards = task_executor(scheduler,game_controller.Task_WarehouseRewards)
     exe_list.append(executor_Task_WarehouseRewards)
-    exe = task_executor(scheduler,GameController_test2.Task_AllianceTechnology)
+    exe = task_executor(scheduler,game_controller.Task_AllianceTechnology)
     exe_list.append(exe)
-    exe = task_executor(scheduler,GameController_test2.Task_RefreshAllianceMobilization)
+    exe = task_executor(scheduler,game_controller.Task_RefreshAllianceMobilization)
+    exe_list.append(exe)
+    exe = task_executor(scheduler,game_controller.Task_AdventureRewards)
     exe_list.append(exe)
     # Start the scheduler
     try:
