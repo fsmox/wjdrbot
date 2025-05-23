@@ -1,0 +1,9 @@
+defult_click_point:
+  x: 24
+  y: 189
+method: None
+picture_path: null
+region: null
+swipe: null
+threshold: 0.8
+window_name: meat_collection_doing

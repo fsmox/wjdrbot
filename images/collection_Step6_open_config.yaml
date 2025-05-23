@@ -2,7 +2,7 @@ defult_click_point:
   x: 432
   y: 225
 method: None
-picture_path: images/meat_collection_Step6_open.png
+picture_path: images/collection_Step6_open.png
 region:
   bottom: 241
   left: 417
@@ -10,4 +10,4 @@ region:
   top: 210
 swipe: null
 threshold: 0.8
-window_name: meat_collection_Step6
+window_name: collection_Step6

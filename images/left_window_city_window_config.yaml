@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 81
+  y: 190
+method: check
+picture_path: images/left_window_city_window.png
+region:
+  bottom: 197
+  left: 68
+  right: 95
+  top: 183
+swipe: null
+threshold: 0.8
+window_name: left_window_city

@@ -214,18 +214,18 @@ class GameController:
             "world":None,
             "left_window":None,
             "warehouse_rewards":None,
+            "close_button":None,
         }
-        self.GameWindows = RegisterWindow(GameWindows_test,window_controller=self.windwow_controller)
+        # type: dict[str, GameWindow]
+        self.GameWindows: dict[str, GameWindow] = RegisterWindow(GameWindows_test, window_controller=self.windwow_controller)
 
-    def RegisterWindow(self, window_name,config=None):
+    def RegisterWindow(self, window_name, config=None) -> 'GameWindow':
         """注册窗口"""
         if window_name in self.GameWindows:
             log(f"窗口 {window_name} 已经注册")
-            
         else:
-            RegisterWindow({window_name:config}, window_controller=self.windwow_controller, GameWindows=self.GameWindows)
+            RegisterWindow({window_name: config}, window_controller=self.windwow_controller, GameWindows=self.GameWindows)
             log(f"窗口 {window_name} 注册成功")
-        
         return self.GameWindows[window_name]
 
     def Reconnect(self,task_name=None):
@@ -508,7 +508,7 @@ class GameController:
 
 
     def Task_AllianceTechnology(self):
-        self.ReturnToCity()
+        # self.ReturnToCity()
         self.OpenAllianceWindow()
         self.OpenAllianceTechnologyWindow()
         self.ClickAllianceTechnologyRecommendButton()
@@ -543,13 +543,23 @@ class GameController:
     
     def Task_WarehouseRewards(self):
         """领取仓库奖励"""
+        left_window_city = self.GameWindows.get("left_window_city", self.RegisterWindow("left_window_city"))
+        left_window_world = self.GameWindows.get("left_window_world", self.RegisterWindow("left_window_world"))
         GameWindows = self.GameWindows
         defult_count_down = 5*60
         city = GameWindows["city"]
         if not city.CurrentWindowIsMe():
             city.open()
-        GameWindows["world"].open()
+        if not GameWindows["world"].open():
+            return defult_count_down
         GameWindows["left_window"].open()
+        if left_window_city.CurrentWindowIsMe():
+            pass
+        elif left_window_world.CurrentWindowIsMe():
+            left_window_city.open()
+        else:
+            log("左侧窗口打开失败")
+            return defult_count_down
         GameWindows["warehouse_rewards"].open()
         conunt_down = GameWindows["warehouse_rewards"].GetCoolDownTime()
         x, y = city.open_config["defult_click_point"]["x"], city.open_config["defult_click_point"]["y"]
@@ -559,38 +569,96 @@ class GameController:
         log(f"冷却时间: {conunt_down}秒")
         return conunt_down
     
-    def Task_wood_collection(self):
+    def Task_collection(self):
+        collection_type_list = ["meat", "wood", "coal", "iron"]
         self.GoToCity()
         GameWindows = self.GameWindows
         GameWindows["world"].open()
+        cool_time = 60*10
         
-        if not "wood_collection_Step7" in GameWindows:
-            wood_collection_window = {}
+        if not "collection_Step7" in GameWindows:
+            collection_window = {}
             for i in range(1,8):
-                wood_collection_window[f"wood_collection_Step{i}"] = None
-            RegisterWindow(wood_collection_window, window_controller=self.windwow_controller, GameWindows=self.GameWindows)
-        for i in range(1,8):
-            window_name = f"wood_collection_Step{i}"
-            GameWindows[window_name].open()
-            if not GameWindows[window_name].CurrentWindowIsMe():
-                log(f"木材采集窗口{window_name}未打开")
-                return 60*2
-    def Task_meat_collection(self):
-        self.GoToCity()
+                if i == 2:
+                    pass
+                else:
+                    collection_window[f"collection_Step{i}"] = None
+            for collection_type in collection_type_list:
+                collection_window[f"{collection_type}_collection_Step2"] = None
+                collection_window[f"{collection_type}_collection_doing"] = None
+            RegisterWindow(collection_window, window_controller=self.windwow_controller, GameWindows=self.GameWindows)
+        for collection_type in collection_type_list:
+            if GameWindows[f"{collection_type}_collection_doing"].CurrentWindowIsMe():
+                continue
+            for i in range(1,8):
+                if i == 2:
+                    window_name = f"{collection_type}_collection_Step2"
+                else:
+                    window_name = f"collection_Step{i}"
+                GameWindows[window_name].open()
+                if not GameWindows[window_name].CurrentWindowIsMe():
+                    log(f"{collection_type}采集窗口{window_name}未打开")
+                    self.GoToCity()
+                    GameWindows["world"].open()
+                    cool_time = 60*2
+                    break
+        
+        return cool_time
+
+    def Task_Reconnect(self):
+        count_down = 60*5
+        reconnect_window = self.GameWindows.get("reconcect", self.RegisterWindow("reconcect"))
+        if reconnect_window.CurrentWindowIsMe():
+            click_point = reconnect_window.GetDefultClickPoint()
+            if click_point is not None:
+                x, y = click_point["x"], click_point["y"]
+                self.windwow_controller.tap(x, y)
+                time.sleep(1)
+
+                count_down = 60*30
+        
+        return count_down
+    
+    def GoToCXD(self):
         GameWindows = self.GameWindows
-        GameWindows["world"].open()
+        city = GameWindows["city"]
+        world = GameWindows["world"]
+        left_window = GameWindows["left_window"]
+        left_window_city = GameWindows.get("left_window_city", 
+                                    self.RegisterWindow("left_window_city"))
+        left_window_world = GameWindows.get("left_window_world", 
+                                    self.RegisterWindow("left_window_world"))
+        cxd_window = GameWindows.get("CXD", 
+                                    self.RegisterWindow("CXD"))
+        click_figure = GameWindows.get("click_figure",
+                                    self.RegisterWindow("click_figure"))
         
-        if not "meat_collection_Step7" in GameWindows:
-            meat_collection_window = {}
-            for i in range(1,8):
-                meat_collection_window[f"meat_collection_Step{i}"] = None
-            RegisterWindow(meat_collection_window, window_controller=self.windwow_controller, GameWindows=self.GameWindows)
-        for i in range(1,8):
-            window_name = f"meat_collection_Step{i}"
-            GameWindows[window_name].open()
-            if not GameWindows[window_name].CurrentWindowIsMe():
-                log(f"生肉采集窗口{window_name}未打开")
-                return 60*2
+        """返回城市"""
+        if ((not city.CurrentWindowIsMe()) and 
+            (not world.CurrentWindowIsMe())):
+            self.GoToCity()
+        
+        left_window.open()
+        if left_window_city.CurrentWindowIsMe():
+            pass
+        elif left_window_world.CurrentWindowIsMe():
+            left_window_city.open()
+        else:
+            pass
+        
+        if not left_window_city.CurrentWindowIsMe():
+            log("左侧城市窗口打开失败")
+            return False
+        
+        re = cxd_window.open()
+        if re:
+            for i in range(5):
+                time.sleep(0.4)
+                if click_figure.open():
+                    break
+        return re
+
+
 
     def GoToCity(self):
         """返回城市"""
@@ -618,6 +686,21 @@ class GameController:
             if city.CurrentWindowIsMe():
                 log("返回城市成功")
                 return True
+        
+        self.GameWindows["close_button"].open()
+        if city.CurrentWindowIsMe():
+            log("返回城市成功")
+            return True
+        
+        colloction_window = self.GameWindows.get("collection_Step1", None)
+        if not colloction_window is None:
+            if colloction_window.CurrentWindowIsMe():
+                city.windwow_controller.tap(250,450)
+        
+        city.open()
+        if city.CurrentWindowIsMe():
+            log("返回城市成功")
+            return True
         
         x, y = city.open_config["defult_click_point"]["x"], city.open_config["defult_click_point"]["y"]
         city.windwow_controller.tap(x,y)
@@ -1167,6 +1250,15 @@ class GameWindow:
         else:
             log(f"{window_name}按钮不存在")
             return False
+    
+    def GetDefultClickPoint(self):
+        """获取默认点击点"""
+        if self.open_config is None:
+            return None
+        if "defult_click_point" in self.open_config:
+            return self.open_config["defult_click_point"]
+        else:
+            return None
 
     def CurrentWindowIsFather(self):
         """判断当前窗口是否是父窗口"""
@@ -1234,7 +1326,7 @@ class GameWindow:
                 log(f"{self.window_name}窗口已打开")
                 break
 
-        time.sleep(1)
+        return True
 
     def return_to_father_window(self):
         pass
@@ -1282,7 +1374,7 @@ def RegisterWindow(windows_config,window_controller=None,GameWindows=None):
 
 if __name__ == "__main__":
     game_controller = GameController()
-    game_controller.Task_wood_collection()
+    game_controller.GoToCXD()
     # GameWindows_test = {
     #     "city":None,
     #     "world":None,

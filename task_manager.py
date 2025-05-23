@@ -9,13 +9,14 @@ import time
 from apscheduler.executors.pool import ThreadPoolExecutor
 
 class task_executor:
-    def __init__(self,scheduler, task, arg=None):
+    def __init__(self,scheduler, task, arg=None, GoToCXD=None):
         self.scheduler = scheduler
         self.task = task
         self.arg = arg
         self.schedule_task_now()
         self.fail_count = 0
         self.max_fail_count = 5
+        self.GoToCXD = GoToCXD
     def execute_task(self):
         """
         Execute the task immediately.
@@ -26,6 +27,8 @@ class task_executor:
                 count_down = self.task(self.arg)
             else:
                 count_down = self.task()
+            if not self.GoToCXD is None:
+                self.GoToCXD()
             self.fail_count = 0
         except Exception as e:
             print(f"Error executing task: {e}")
@@ -53,45 +56,32 @@ class task_executor:
 if __name__ == "__main__":
     from GameController import *
 
-    window_controller = WindowsController()
-    GameController_test = GameController(window_controller)
-    window_controller2 = WindowsController()
-    GameController_test2 = GameController(window_controller2)
+    Run_num = 1
     exe_list = []
-
-
-    # GameWindows1 = RegisterWindow(GameWindows_test,window_controller=window_controller)
-    GameController_test.GoToCity()
-    # GameWindows2 = RegisterWindow(GameWindows_test,window_controller=window_controller2)
-    GameController_test2.GoToCity()
-    # Create a scheduler instance
     executors = {
     'default': ThreadPoolExecutor(1)  # 限制只能一个任务同时执行
     }
     scheduler = BackgroundScheduler(executors=executors)
-    # Create an instance of the task_executor with the test_task
+    for i in range(Run_num):
+        window_controller = WindowsController()
+        GameController_test = GameController(window_controller)
+        GameController_test.GoToCity()
 
-    
-    game_controller = GameController_test 
-    executor_Task_WarehouseRewards = task_executor(scheduler,game_controller.Task_WarehouseRewards)
-    exe_list.append(executor_Task_WarehouseRewards)
-    exe = task_executor(scheduler,game_controller.Task_AllianceTechnology)
-    exe_list.append(exe)
-    exe = task_executor(scheduler,game_controller.Task_RefreshAllianceMobilization)
-    exe_list.append(exe)
-    exe = task_executor(scheduler,game_controller.Task_AdventureRewards)
-    exe_list.append(exe)
+        game_controller = GameController_test 
+        GoToCxd = game_controller.GoToCXD
+        exe = task_executor(scheduler,game_controller.Task_WarehouseRewards,GoToCXD=GoToCxd)
+        exe_list.append(exe)
+        exe = task_executor(scheduler,game_controller.Task_AllianceTechnology)
+        exe_list.append(exe)
+        # exe = task_executor(scheduler,game_controller.Task_RefreshAllianceMobilization,GoToCXD=GoToCxd)
+        # exe_list.append(exe)
+        exe = task_executor(scheduler,game_controller.Task_AdventureRewards)
+        exe_list.append(exe)
+        exe = task_executor(scheduler,game_controller.Task_collection,GoToCXD=GoToCxd)
+        exe_list.append(exe)
+        exe = task_executor(scheduler,game_controller.Task_Reconnect)
+        exe_list.append(exe)
 
-    game_controller = GameController_test2
-    executor_Task_WarehouseRewards = task_executor(scheduler,game_controller.Task_WarehouseRewards)
-    exe_list.append(executor_Task_WarehouseRewards)
-    exe = task_executor(scheduler,game_controller.Task_AllianceTechnology)
-    exe_list.append(exe)
-    exe = task_executor(scheduler,game_controller.Task_RefreshAllianceMobilization)
-    exe_list.append(exe)
-    exe = task_executor(scheduler,game_controller.Task_AdventureRewards)
-    exe_list.append(exe)
-    # Start the scheduler
     try:
         print("Scheduler started. Press Ctrl+C to exit.")
         scheduler.start()

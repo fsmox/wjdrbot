@@ -1,7 +1,7 @@
 defult_click_point:
   x: 78
   y: 190
-method: check
+method: None
 picture_path: images/left_window_window.png
 region:
   bottom: 208

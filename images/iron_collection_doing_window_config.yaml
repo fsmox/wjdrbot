@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 24
+  y: 234
+method: find
+picture_path: images/iron_collection_doing_window.png
+region:
+  bottom: 248
+  left: 9
+  right: 39
+  top: 220
+swipe: null
+threshold: 0.8
+window_name: iron_collection_doing

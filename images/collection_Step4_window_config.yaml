@@ -1,8 +1,8 @@
 defult_click_point:
   x: 89
   y: 27
-method: check
-picture_path: images/meat_collection_Step4_window.png
+method: None
+picture_path: images/collection_Step4_window.png
 region:
   bottom: 39
   left: 67
@@ -10,4 +10,4 @@ region:
   top: 16
 swipe: null
 threshold: 0.8
-window_name: meat_collection_Step4
+window_name: collection_Step4

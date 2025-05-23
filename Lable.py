@@ -93,7 +93,7 @@ def on_save_button_click():
     # 取最后一个框
     box_id = bounding_boxes[-1]
     x1, y1, x2, y2 = map(int, canvas.coords(box_id))
-    save_Lable(img_rgb, (x1, y1, x2, y2))
+    save_Lable(img_rgb, (x1, y1, x2, y2), swipe_config=last_swipe_config)
 
 save_button = tk.Button(root, text="保存标注", command=on_save_button_click)
 save_button.grid(row=4, column=2, sticky="w")
@@ -113,11 +113,13 @@ def save_Lable(label_img, box, swipe_config =None):
     step = step_entry.get()
     # 判断 open_radio 还是 window_radio 被选中
     click_type = click_mode_var.get()
-    window_name = f"{task_name}_{step}"
+    window_name = task_name
+    if step:
+        window_name = f"{window_name}_{step}"
     if not window_name:
         print("请先输入任务名")
         return
-    name = f"{window_name}_{step}_{click_type}"
+    name = f"{window_name}_{click_type}"
     picture_path = f"images/{name}.png"
     config_path = f"images/{name}_config.yaml"
     method = JudgeType(judge_type_var.get())

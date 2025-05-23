@@ -1,8 +1,8 @@
 defult_click_point:
   x: 385
   y: 853
-method: check
-picture_path: images/meat_collection_Step7_open.png
+method: None
+picture_path: null
 region:
   bottom: 880
   left: 285
@@ -10,4 +10,4 @@ region:
   top: 827
 swipe: null
 threshold: 0.8
-window_name: meat_collection_Step7
+window_name: collection_Step7
