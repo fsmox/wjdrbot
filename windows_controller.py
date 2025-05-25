@@ -31,7 +31,8 @@ class WindowsController:
             self.left_offset = 0
             self.right_offset = 0
 
-
+    def active(self):
+        pass
     def XY_to_real(self, x, y):
         x_ratio = x / Capture_width
         y_ratio = y / Capture_height

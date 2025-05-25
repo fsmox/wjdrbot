@@ -6,9 +6,10 @@ import cv2
 from skimage.measure import label, regionprops
 from windows_controller import WindowsController
 import yaml
+from adb_controller import ADBController
 
 # 截图 + 边缘检测 + 连通区域
-controller = WindowsController()
+controller = ADBController()
 screenshot = controller.screenshot()  # PIL.Image
 img_rgb = np.array(screenshot)
 gray = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2GRAY)
@@ -32,10 +33,6 @@ canvas.grid(row=0, column=0, rowspan=10)
 tk_img = ImageTk.PhotoImage(Image.fromarray(img_rgb))
 canvas_img = canvas.create_image(0, 0, anchor="nw", image=tk_img)
 
-# 输入框
-tk.Label(root, text="输入标注或备注:").grid(row=0, column=1, sticky="w")
-entry = tk.Entry(root, width=30)
-entry.grid(row=1, column=1, sticky="w")
 
 # 图标块预览列表
 preview_labels = []
@@ -218,8 +215,6 @@ def on_click(event):
             label.image = preview
             label.grid(row=2 + len(preview_labels), column=1, sticky="w")
             preview_labels.append(label)
-            text = entry.get()
-            print(f"你输入的备注：{text}")
             method = JudgeType(judge_type_var.get())
             print(f"检测方法：{method.value}")
             break
@@ -284,8 +279,6 @@ def on_canvas_release(event):
     preview_labels.append(label)
 
     # 输出备注
-    text = entry.get()
-    print(f"你输入的备注：{text}")
     method = JudgeType(judge_type_var.get())
     print(f"检测方法：{method.value}")
 
@@ -326,6 +319,8 @@ swipe_end = [None, None]
 swipe_arrow = [None]
 swipe_time = [None]
 swipe_time_label = [None]
+# 保存swipe参数
+last_swipe_config = None
 
 def on_swipe_press(event):
     if mode_var.get() != "swipe":
@@ -376,8 +371,7 @@ def on_swipe_motion(event):
 
 
 
-# 保存swipe参数
-last_swipe_config = None
+
 
 # # 修改on_save_button_click，保存swipe参数
 # def on_save_button_click():
@@ -393,13 +387,15 @@ from GameController import GameController
 import glob
 import os
 import re
+from tkinter import filedialog
 
 
 def test_data():
     # 读取配置文件
     window_name = task_entry_task_name.get()
     step = step_entry.get()
-    window_name = f"{window_name}_{step}"
+    step_info = "_" + step if step else ""
+    window_name = f"{window_name}{step_info}"
 
     game_controller = GameController(windwow_controller=controller) 
 
@@ -435,5 +431,147 @@ def test_dataset():
 
 dataset_test_button = tk.Button(root, text="数据集测试", command=test_dataset)
 dataset_test_button.grid(row=10, column=2, sticky="w")
+
+def load_config():
+    global last_swipe_config
+    global swipe_arrow
+    global swipe_time_label
+
+    config_path = filedialog.askopenfilename(
+        title="选择配置文件",
+        filetypes=[("YAML files", "*.yaml"), ("All files", "*.*")]
+    )
+    if not config_path:
+        return
+    with open(config_path, 'r') as f:
+        config = yaml.safe_load(f)
+    file_name = os.path.basename(config_path)
+    file_name_without_ext = os.path.splitext(file_name)[0]
+    # 任务名
+    window_name = file_name_without_ext.replace("_config", "")
+    task_name = window_name.replace("_window", "").replace("_open", "")
+    task_entry_task_name.delete(0, tk.END)
+    task_entry_task_name.insert(0, task_name)
+    # # Step
+    # if "_" in window_name:
+    #     parts = window_name.split("_")
+    #     if len(parts) > 1:
+    #         step_entry.delete(0, tk.END)
+    #         step_entry.insert(0, parts[-1])
+    step_entry.delete(0, tk.END)
+    # 检测方法
+    method = config.get("method", JudgeType.CHECK.value)
+    judge_type_var.set(method)
+    # 点击类型
+    click_type = "open"
+    if window_name.endswith("_window"):
+        click_type = "window"
+    elif window_name.endswith("_open"):
+        click_type = "open"
+    click_mode_var.set(click_type)
+    # 标注模式不做自动设置
+    # 框区域
+
+    # 显示config中指向的图片
+    picture_path = config.get("picture_path", "")
+    if picture_path and os.path.exists(picture_path):
+        loaded_img = Image.open(picture_path)
+        img_h, img_w = loaded_img.size
+        loaded_img = loaded_img.resize((100, 100))
+        # loaded_img = loaded_img.resize((img_w, img_h))
+        # global tk_img
+        # tk_img = ImageTk.PhotoImage(loaded_img)
+        # canvas.itemconfig(canvas_img, image=tk_img)
+        preview = ImageTk.PhotoImage(loaded_img)
+        label = tk.Label(root, image=preview)
+        label.image = preview
+        label.grid(row=0, column=1, sticky="w")
+
+    region = config.get("region", {})
+    if region:
+        clear_boxes_and_previews()
+        left = region.get("left", 0)
+        top = region.get("top", 0)
+        right = region.get("right", 0)
+        bottom = region.get("bottom", 0)
+        high = bottom - top
+        wide = right - left
+
+        box = canvas.create_rectangle(left, top, right, bottom, outline="red", width=2)
+        bounding_boxes.append(box)
+        crop = img_rgb[top:bottom, left:right]
+        pil_crop = Image.fromarray(crop).resize((100, 100))
+        preview = ImageTk.PhotoImage(pil_crop)
+        label = tk.Label(root, image=preview)
+        label.image = preview
+        label.grid(row=2 + len(preview_labels), column=1, sticky="w")
+        preview_labels.append(label)
+    # swipe参数
+    swipe = config.get("swipe", None)    # ...existing code...
+    
+    # if method.find("find") >= 0:
+
+
+
+    # 根据region信息画bounding box
+    region = config.get("region", {})
+    if region:
+        clear_boxes_and_previews()
+        left = region.get("left", 0)
+        top = region.get("top", 0)
+        right = region.get("right", 0)
+        bottom = region.get("bottom", 0)
+        box = canvas.create_rectangle(left, top, right, bottom, outline="red", width=2)
+        bounding_boxes.append(box)
+        crop = img_rgb[top:bottom, left:right]
+        pil_crop = Image.fromarray(crop).resize((100, 100))
+        preview = ImageTk.PhotoImage(pil_crop)
+        label = tk.Label(root, image=preview)
+        label.image = preview
+        label.grid(row=2 + len(preview_labels), column=1, sticky="w")
+        preview_labels.append(label)
+
+    # 根据swipe信息画箭头
+    swipe = config.get("swipe", None)
+
+    last_swipe_config = swipe
+    if swipe and swipe.get("start") and swipe.get("end"):
+        # 删除旧箭头和时间标签
+        if swipe_arrow[0]:
+            canvas.delete(swipe_arrow[0])
+            swipe_arrow[0] = None
+        if swipe_time_label[0]:
+            swipe_time_label[0].destroy()
+            swipe_time_label[0] = None
+        sx, sy = swipe["start"]["x"], swipe["start"]["y"]
+        ex, ey = swipe["end"]["x"], swipe["end"]["y"]
+        swipe_arrow[0] = canvas.create_line(
+            sx, sy, ex, ey, arrow=tk.LAST, fill="green", width=3
+        )
+        duration = swipe.get("duration", 0)
+        swipe_time_label[0] = tk.Label(root, text=f"滑动时间: {duration:.2f}ms", fg="green")
+        swipe_time_label[0].grid(row=8, column=2, sticky="w")
+
+load_config_button = tk.Button(root, text="读取config", command=load_config)
+load_config_button.grid(row=11, column=2, sticky="w")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 root.mainloop()

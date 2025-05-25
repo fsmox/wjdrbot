@@ -8,5 +8,6 @@ region:
   left: 430
   right: 486
   top: 820
+swipe: null
 threshold: 0.8
-window_name: city_open
+window_name: city

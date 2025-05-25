@@ -9,5 +9,5 @@ region:
   right: 412
   top: 527
 swipe: null
-threshold: 0.8
+threshold: 0.5
 window_name: click_figure

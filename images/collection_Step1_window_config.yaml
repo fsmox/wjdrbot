@@ -1,12 +1,12 @@
 defult_click_point:
-  x: 252
+  x: 253
   y: 852
 method: check
 picture_path: images/collection_Step1_window.png
 region:
   bottom: 880
   left: 143
-  right: 362
+  right: 363
   top: 825
 swipe: null
 threshold: 0.8

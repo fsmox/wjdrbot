@@ -2,7 +2,7 @@ defult_click_point:
   x: 458
   y: 855
 method: check
-picture_path: images/world_open.png
+picture_path: images/city_window_window.png
 region:
   bottom: 890
   left: 430
@@ -10,4 +10,4 @@ region:
   top: 820
 swipe: null
 threshold: 0.8
-window_name: world
+window_name: city_window

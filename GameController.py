@@ -537,8 +537,8 @@ class GameController:
             x, y = point["x"], point["y"]
             city.windwow_controller.tap(x, y)
             time.sleep(2)
-
-        self.GoToCity()
+        self.GameWindows["world"].ClikReturnButton()
+        # self.GoToCity()
         return defult_count_down
     
     def Task_WarehouseRewards(self):
@@ -564,7 +564,7 @@ class GameController:
         conunt_down = GameWindows["warehouse_rewards"].GetCoolDownTime()
         x, y = city.open_config["defult_click_point"]["x"], city.open_config["defult_click_point"]["y"]
         city.windwow_controller.tap(x,y)
-        self.GoToCity()
+        # self.GoToCity()
         
         log(f"冷却时间: {conunt_down}秒")
         return conunt_down
@@ -1304,7 +1304,7 @@ class GameWindow:
                 end_y = self.open_config["swipe"]["end"]["y"]
                 duration = self.open_config["swipe"]["duration"]
                 self.windwow_controller.swipe(start_x, start_y, end_x, end_y, duration)
-                time.sleep(1)
+                time.sleep(0.5)
                 # 先滑动到窗口位置
             if not existed:
                 existed,x,y = judge.Existed(self.windwow_controller.screenshot())
@@ -1319,7 +1319,7 @@ class GameWindow:
 
         self.windwow_controller.tap(x,y)
         for i in range(Operation_interval):
-            time.sleep(1)
+            time.sleep(0.5)
             log(f"第{i+1}次检查游戏窗口")
             task_found = self.CurrentWindowIsMe()
             if task_found:
@@ -1370,11 +1370,12 @@ def RegisterWindow(windows_config,window_controller=None,GameWindows=None):
 
 
 
-
+from adb_controller import ADBController
 
 if __name__ == "__main__":
-    game_controller = GameController()
-    game_controller.GoToCXD()
+    adb_controller = ADBController()
+    game_controller = GameController(adb_controller)
+    game_controller.Task_AdventureRewards()
     # GameWindows_test = {
     #     "city":None,
     #     "world":None,

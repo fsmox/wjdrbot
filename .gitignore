@@ -3,6 +3,7 @@
 __pycache__
 logs
 images/tmp
+images/windows
 .env
 api_server_0.py
 config 0.yaml
