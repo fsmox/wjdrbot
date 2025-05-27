@@ -20,6 +20,8 @@ class ADBController:
             raise Exception("窗口激活失败")
     def check_adb_connection(self):
         try:
+            cmd = ['adb', 'connect', '127.0.0.1:7555']
+            subprocess.run(cmd, check=True)
             subprocess.run(['adb', 'devices'], check=True)
         except subprocess.CalledProcessError:
             raise Exception("ADB 连接失败，请检查设备连接状态")

@@ -219,10 +219,17 @@ class GameController:
         # type: dict[str, GameWindow]
         self.GameWindows: dict[str, GameWindow] = RegisterWindow(GameWindows_test, window_controller=self.windwow_controller)
 
+    def GetWindow(self, window_name) -> 'GameWindow':
+        return self.RegisterWindow(window_name)
+
     def RegisterWindow(self, window_name, config=None) -> 'GameWindow':
         """注册窗口"""
         if window_name in self.GameWindows:
-            log(f"窗口 {window_name} 已经注册")
+            pass
+
+
+        
+            # log(f"窗口 {window_name} 已经注册")
         else:
             RegisterWindow({window_name: config}, window_controller=self.windwow_controller, GameWindows=self.GameWindows)
             log(f"窗口 {window_name} 注册成功")
@@ -508,6 +515,8 @@ class GameController:
 
 
     def Task_AllianceTechnology(self):
+        if self.InReconnectWindow():
+            return 5*60
         # self.ReturnToCity()
         self.OpenAllianceWindow()
         self.OpenAllianceTechnologyWindow()
@@ -518,6 +527,10 @@ class GameController:
         return 2*60*60
     
     def Task_AdventureRewards(self):
+
+        if self.InReconnectWindow():
+            return 5*60
+
         """领取探险奖励"""
 
         click_point_list = [
@@ -530,8 +543,8 @@ class GameController:
         GameWindows = self.GameWindows
         defult_count_down = 60 * 60 * 2  # 默认冷却时间为10分钟
         city = GameWindows["city"]
-        if not city.CurrentWindowIsMe():
-            city.open()
+        # if not city.CurrentWindowIsMe():
+        #     city.open()
         
         for point in click_point_list:
             x, y = point["x"], point["y"]
@@ -543,8 +556,12 @@ class GameController:
     
     def Task_WarehouseRewards(self):
         """领取仓库奖励"""
-        left_window_city = self.GameWindows.get("left_window_city", self.RegisterWindow("left_window_city"))
-        left_window_world = self.GameWindows.get("left_window_world", self.RegisterWindow("left_window_world"))
+
+        if self.InReconnectWindow():
+            return 5*60
+
+        left_window_city = self.GetWindow("left_window_city")
+        left_window_world = self.GetWindow("left_window_world")
         GameWindows = self.GameWindows
         defult_count_down = 5*60
         city = GameWindows["city"]
@@ -570,6 +587,10 @@ class GameController:
         return conunt_down
     
     def Task_collection(self):
+
+        if self.InReconnectWindow():
+            return 5*60
+
         collection_type_list = ["meat", "wood", "coal", "iron"]
         self.GoToCity()
         GameWindows = self.GameWindows
@@ -605,9 +626,12 @@ class GameController:
         
         return cool_time
 
+    def InReconnectWindow(self):
+        reconnect_window = self.GetWindow("reconcect")
+        return reconnect_window.CurrentWindowIsMe()
     def Task_Reconnect(self):
         count_down = 60*5
-        reconnect_window = self.GameWindows.get("reconcect", self.RegisterWindow("reconcect"))
+        reconnect_window = self.GetWindow("reconcect")
         if reconnect_window.CurrentWindowIsMe():
             click_point = reconnect_window.GetDefultClickPoint()
             if click_point is not None:
@@ -659,6 +683,66 @@ class GameController:
         return re
 
 
+    def __Train_sub(self):
+        GameWindows = self.GameWindows
+        for i in range(1,4):
+            training_window = GameWindows.get(f"train_Step{i}", self.RegisterWindow(f"train_Step{i}"))
+            if i == 1:
+                for j in range(5):
+                    open = training_window.open()
+                    if open:
+                        x,y = training_window.open_XY
+                        training_window.windwow_controller.tap(x,y)
+                        break
+            else:
+                open = training_window.open()
+            if not open:
+                return False, 60*60*5
+        CoolDownTime = training_window.GetCoolDownTime()
+        training_window.ClikReturnButton()
+        return True,CoolDownTime
+    # 练兵任务
+    def __Train(self,type):
+        """练兵任务"""
+        GameWindows = self.GameWindows
+        self.GoToCity()
+
+        left_window = GameWindows.get("left_window", self.RegisterWindow("left_window"))
+        left_window_city = GameWindows.get("left_window_city", self.RegisterWindow("left_window_city"))
+        left_window_world = GameWindows.get("left_window_world", self.RegisterWindow("left_window_world"))
+
+        training_complete = f"{type}_training_complete"
+        training_complete_window = self.GetWindow(training_complete)
+        # # 矛兵训练完成窗口
+        # spear_training_complete_window = self.GetWindow("spear_training_complete")
+        # # 弓兵训练完成窗口
+        # bow_training_complete_window = self.GetWindow("bow_training_complete")
+
+        
+        left_window.open()
+        if left_window_world.CurrentWindowIsMe():
+            left_window_city.open()
+        if training_complete_window.CurrentWindowIsMe():
+            x,y = training_complete_window.judge_point
+            training_complete_window.windwow_controller.tap(x,y)
+            ok , cool_down = self.__Train_sub()
+        else:
+            cool_down = 10*60
+    
+        return cool_down 
+    
+    def Task_train_shield(self):
+        return self.__Train("shield")
+
+    
+    def Task_train_spear(self):
+        return self.__Train("spear")
+
+    
+    def Task_train_bow(self):
+        return self.__Train("bow")
+    
+
 
     def GoToCity(self):
         """返回城市"""
@@ -692,7 +776,7 @@ class GameController:
             log("返回城市成功")
             return True
         
-        colloction_window = self.GameWindows.get("collection_Step1", None)
+        colloction_window = self.GetWindow("collection_Step1")
         if not colloction_window is None:
             if colloction_window.CurrentWindowIsMe():
                 city.windwow_controller.tap(250,450)
@@ -1218,6 +1302,7 @@ class GameWindow:
         self.open_config = open_config
         self.in_window_config = in_window_config
         self.cool_down_config = cool_down_config
+        self.open_XY = None
 
     def CurrentWindowIsMe(self):
         """判断当前窗口是否是我"""
@@ -1231,6 +1316,7 @@ class GameWindow:
         judge = ImageJudge(self.in_window_config,f"{self.window_name}_in_window")
         # 检查当前窗口是否是我
         existed,x,y = judge.Existed(screen)
+        self.judge_point = (x,y)
         return existed
 
     def ClikReturnButton(self, task_name=None):
@@ -1245,7 +1331,7 @@ class GameWindow:
         if existed:
             log(f"点击{window_name}按钮")
             self.windwow_controller.tap(x,y)
-            time.sleep(1)
+            
             return True
         else:
             log(f"{window_name}按钮不存在")
@@ -1304,7 +1390,7 @@ class GameWindow:
                 end_y = self.open_config["swipe"]["end"]["y"]
                 duration = self.open_config["swipe"]["duration"]
                 self.windwow_controller.swipe(start_x, start_y, end_x, end_y, duration)
-                time.sleep(0.5)
+                time.sleep(1)
                 # 先滑动到窗口位置
             if not existed:
                 existed,x,y = judge.Existed(self.windwow_controller.screenshot())
@@ -1318,13 +1404,14 @@ class GameWindow:
         
 
         self.windwow_controller.tap(x,y)
+        self.open_XY =(x,y)
         for i in range(Operation_interval):
-            time.sleep(0.5)
             log(f"第{i+1}次检查游戏窗口")
             task_found = self.CurrentWindowIsMe()
             if task_found:
                 log(f"{self.window_name}窗口已打开")
                 break
+            time.sleep(0.5)
 
         return True
 
@@ -1375,7 +1462,10 @@ from adb_controller import ADBController
 if __name__ == "__main__":
     adb_controller = ADBController()
     game_controller = GameController(adb_controller)
-    game_controller.Task_AdventureRewards()
+    print(game_controller.Task_train_shield())
+    print(game_controller.Task_train_spear())
+    print(game_controller.Task_train_bow())
+    
     # GameWindows_test = {
     #     "city":None,
     #     "world":None,

@@ -41,11 +41,17 @@ class task_executor:
                 return
             else:
                 count_down = 60 * 2 * self.fail_count  # Increase the countdown time exponentially
-            
-        next_run_time = datetime.now() + timedelta(seconds=count_down)
-        print(f"Next run time: {next_run_time}")
-        # Schedule the next run
-        self.scheduler.add_job(self.execute_task, trigger='date', run_date=next_run_time, misfire_grace_time=3600)
+        if type(count_down) == list:
+            for time in count_down:
+                next_run_time = datetime.now() + timedelta(seconds=count_down)
+                print(f"Next run time: {next_run_time}")
+                # Schedule the next run
+                self.scheduler.add_job(self.execute_task, trigger='date', run_date=next_run_time, misfire_grace_time=20*60)
+        else:
+            next_run_time = datetime.now() + timedelta(seconds=count_down)
+            print(f"Next run time: {next_run_time}")
+            # Schedule the next run
+            self.scheduler.add_job(self.execute_task, trigger='date', run_date=next_run_time, misfire_grace_time=20*60)
 
     def schedule_task_now(self):
         """

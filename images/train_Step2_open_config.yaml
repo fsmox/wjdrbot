@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 339
+  y: 600
+method: find
+picture_path: images/train_Step2_open.png
+region:
+  bottom: 628
+  left: 314
+  right: 365
+  top: 573
+swipe: null
+threshold: 0.8
+window_name: train_Step2
