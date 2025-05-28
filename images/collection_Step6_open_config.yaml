@@ -1,7 +1,7 @@
 defult_click_point:
   x: 432
   y: 225
-method: None
+method: check
 picture_path: images/collection_Step6_open.png
 region:
   bottom: 241

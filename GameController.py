@@ -575,8 +575,11 @@ class GameController:
         elif left_window_world.CurrentWindowIsMe():
             left_window_city.open()
         else:
-            log("左侧窗口打开失败")
-            return defult_count_down
+            pass
+        
+        if not left_window_city.CurrentWindowIsMe():
+            log("左侧城市窗口打开失败")
+            return False
         GameWindows["warehouse_rewards"].open()
         conunt_down = GameWindows["warehouse_rewards"].GetCoolDownTime()
         x, y = city.open_config["defult_click_point"]["x"], city.open_config["defult_click_point"]["y"]
@@ -586,6 +589,31 @@ class GameController:
         log(f"冷却时间: {conunt_down}秒")
         return conunt_down
     
+    # 获取空闲行军队列数量
+    def ExsitedFreeArmyQueue(self):
+        left_window = self.GetWindow("left_window")
+        left_window_city = self.GetWindow("left_window_city")
+        left_window_world = self.GetWindow("left_window_world")
+        world = self.GetWindow("world")
+        FreeArmyQueue = self.GetWindow("FreeArmyQueue")
+        close_left_window = self.GetWindow("CloseLeftWindow")
+
+        left_window.open()
+        if left_window_city.CurrentWindowIsMe():
+            left_window_world.open()
+        if not left_window_world.CurrentWindowIsMe():
+            log("左侧窗口打开失败")
+            return False
+        if FreeArmyQueue.CurrentWindowIsMe():
+            re = True
+        else:
+            re = False
+        
+        close_left_window.open()
+        
+        return re
+        
+
     def Task_collection(self):
 
         if self.InReconnectWindow():
@@ -593,9 +621,14 @@ class GameController:
 
         collection_type_list = ["meat", "wood", "coal", "iron"]
         self.GoToCity()
+        if not self.ExsitedFreeArmyQueue():
+            log("没有空闲行军队列，无法进行采集")
+            return cool_time
         GameWindows = self.GameWindows
         GameWindows["world"].open()
-        cool_time = 60*10
+        cool_time = []
+
+
         
         if not "collection_Step7" in GameWindows:
             collection_window = {}
@@ -608,6 +641,7 @@ class GameController:
                 collection_window[f"{collection_type}_collection_Step2"] = None
                 collection_window[f"{collection_type}_collection_doing"] = None
             RegisterWindow(collection_window, window_controller=self.windwow_controller, GameWindows=self.GameWindows)
+        need_run_again = False
         for collection_type in collection_type_list:
             if GameWindows[f"{collection_type}_collection_doing"].CurrentWindowIsMe():
                 continue
@@ -616,14 +650,21 @@ class GameController:
                     window_name = f"{collection_type}_collection_Step2"
                 else:
                     window_name = f"collection_Step{i}"
+                if i==4:
+                    cool_time_task = GameWindows[window_name].GetCoolDownTime()
+                    if not cool_time_task is None:
+                        cool_time_task
                 GameWindows[window_name].open()
                 if not GameWindows[window_name].CurrentWindowIsMe():
                     log(f"{collection_type}采集窗口{window_name}未打开")
                     self.GoToCity()
                     GameWindows["world"].open()
-                    cool_time = 60*2
+                    need_run_again = True
                     break
-        
+            else:
+                cool_time.append(cool_time_task)
+        if need_run_again:
+            cool_time.append(2*60)
         return cool_time
 
     def InReconnectWindow(self):
@@ -1462,9 +1503,10 @@ from adb_controller import ADBController
 if __name__ == "__main__":
     adb_controller = ADBController()
     game_controller = GameController(adb_controller)
-    print(game_controller.Task_train_shield())
-    print(game_controller.Task_train_spear())
-    print(game_controller.Task_train_bow())
+    # print(game_controller.Task_train_shield())
+    # print(game_controller.Task_train_spear())
+    # print(game_controller.Task_train_bow())
+    game_controller.Task_collection()
     
     # GameWindows_test = {
     #     "city":None,

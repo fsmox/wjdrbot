@@ -102,6 +102,8 @@ open_radio = tk.Radiobutton(root, text="open", variable=click_mode_var, value="o
 open_radio.grid(row=7, column=1, sticky="w")
 window_radio = tk.Radiobutton(root, text="window", variable=click_mode_var, value="window")
 window_radio.grid(row=8, column=1, sticky="w")
+window_radio = tk.Radiobutton(root, text="cool_down", variable=click_mode_var, value="cool_down")
+window_radio.grid(row=9, column=1, sticky="w")
 
 def save_Lable(label_img, box, swipe_config =None):
 

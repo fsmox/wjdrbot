@@ -9,5 +9,5 @@ region:
   right: 95
   top: 183
 swipe: null
-threshold: 0.8
+threshold: 0.95
 window_name: left_window_city

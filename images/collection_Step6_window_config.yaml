@@ -1,7 +1,7 @@
 defult_click_point:
   x: 384
   y: 310
-method: check
+method: None
 picture_path: images/collection_Step6_window.png
 region:
   bottom: 404
