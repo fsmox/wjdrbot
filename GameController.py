@@ -245,16 +245,16 @@ class GameController:
     def ReturnToCity(self, task_name=None):
         """返回城市"""
         # 获取屏幕截图
-        with lock:
-            world_exists = self.check_image(config_world["picture_path"], config_world["region"], config_world["threshold"], notify=True, task_name=task_name, real_time_show=False)
-            if world_exists:
-                return True
-            city_exists = self.check_image(config_city["picture_path"], config_city["region"], config_city["threshold"], notify=True, task_name=task_name, real_time_show=False)
-            if city_exists:
-                x = (config_city['region']['left'] + config_city['region']['right']) // 2
-                y = (config_city['region']['top'] + config_city['region']['bottom']) // 2
-                log(f"图像匹配成功，点击位置: ({x}, {y})")
-                self.windwow_controller.tap(x, y)
+        # with lock:
+        world_exists = self.check_image(config_world["picture_path"], config_world["region"], config_world["threshold"], notify=True, task_name=task_name, real_time_show=False)
+        if world_exists:
+            return True
+        city_exists = self.check_image(config_city["picture_path"], config_city["region"], config_city["threshold"], notify=True, task_name=task_name, real_time_show=False)
+        if city_exists:
+            x = (config_city['region']['left'] + config_city['region']['right']) // 2
+            y = (config_city['region']['top'] + config_city['region']['bottom']) // 2
+            log(f"图像匹配成功，点击位置: ({x}, {y})")
+            self.windwow_controller.tap(x, y)
         
         return_city = False
         for _ in range(Operation_interval):
@@ -284,12 +284,12 @@ class GameController:
     def ClikReturnButton(self, task_name=None):
         """点击返回按钮"""
         
-        with lock:
-            existed = self.check_image(config_return_button["picture_path"], config_return_button["region"], config_return_button["threshold"], notify=True, task_name=task_name, real_time_show=False)
-            if not existed:
-                log("返回按钮不存在")
-                return False
-            self.windwow_controller.tap(config_return_button["defult_location"]["x"], config_return_button["defult_location"]["y"])
+        # with lock:
+        existed = self.check_image(config_return_button["picture_path"], config_return_button["region"], config_return_button["threshold"], notify=True, task_name=task_name, real_time_show=False)
+        if not existed:
+            log("返回按钮不存在")
+            return False
+        self.windwow_controller.tap(config_return_button["defult_location"]["x"], config_return_button["defult_location"]["y"])
             
         return True
 
@@ -327,8 +327,8 @@ class GameController:
         seccess = False
         for i in range(3):
             log(f"尝试打开联盟总动员第{i+1}次")
-            with lock:
-                self.windwow_controller.swipe(253, 100, 500, 100,200)  # 快速右滑将界面拉到最左
+            # with lock:
+            self.windwow_controller.swipe(253, 100, 500, 100,200)  # 快速右滑将界面拉到最左
             time.sleep(2)
             find = self.find_and_click_image(config_alliance_mobilization["picture_path"], config_alliance_mobilization["threshold"], notify=False, task_name=task_name)
             if find:
@@ -505,8 +505,8 @@ class GameController:
         if not exsited:
             log("大拇指选项不存在")
             return False
-        with lock:
-            self.windwow_controller.tap(x, y)
+        # with lock:
+        self.windwow_controller.tap(x, y)
         time.sleep(1)
         self.windwow_controller.long_press(374,714,5000)
         self.windwow_controller.tap(config_return_button["defult_location"]["x"],config_return_button["defult_location"]["y"])
