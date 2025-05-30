@@ -1437,6 +1437,9 @@ class GameWindow:
         #     log("当前窗口不是父窗口，无法打开游戏窗口")
         #     return False
 
+        if self.open_config is None:
+            raise Exception(f"未配置 {self.window_name} 的 open_config，无法打开窗口")
+
         judge = ImageJudge(self.open_config,f"{self.window_name}_open")
 
         if judge.method == "swipe_check" or judge.method == "swipe_find":
@@ -1460,6 +1463,9 @@ class GameWindow:
         else:
             existed,x,y = judge.Existed(self.windwow_controller.screenshot)
         
+        if self.in_window_config is None:
+            return True
+
         if not existed:
             if self.CurrentWindowIsMe(enable_cache=False):
                 return True
@@ -1502,21 +1508,24 @@ def RegisterWindow(windows_config,window_controller=None,GameWindows=None):
             in_window_config = config.get("in_window_config",in_window_config)
             open_config = config.get("open_config",open_config)
 
-        if os.path.exists(in_window_config) and os.path.exists(open_config):
+        if os.path.exists(in_window_config):
             with open(in_window_config, 'r', encoding='utf-8') as f:
                 in_window_config = yaml.safe_load(f)
+        else:
+            in_window_config = None
+        if os.path.exists(open_config):
             with open(open_config, 'r', encoding='utf-8') as f:
                 open_config = yaml.safe_load(f)
-            
-            if os.path.exists(cool_down_config):
-                with open(cool_down_config, 'r', encoding='utf-8') as f:
-                    cool_down_config = yaml.safe_load(f)
-            else:
-                cool_down_config = None
-            GameWindows[window_name] = GameWindow(window_name,open_config,in_window_config,cool_down_config,window_controller)
         else:
-            log(f"窗口配置文件不存在: {in_window_config} 或 {open_config}")
-            continue
+            open_config = None
+            
+        if os.path.exists(cool_down_config):
+            with open(cool_down_config, 'r', encoding='utf-8') as f:
+                cool_down_config = yaml.safe_load(f)
+        else:
+            cool_down_config = None
+        GameWindows[window_name] = GameWindow(window_name,open_config,in_window_config,cool_down_config,window_controller)
+
 
     return GameWindows
 
