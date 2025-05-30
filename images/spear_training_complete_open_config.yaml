@@ -1,7 +1,7 @@
 defult_click_point:
   x: 284
   y: 444
-method: check
+method: None
 picture_path: images/spear_training_complete_open.png
 region:
   bottom: 461

@@ -1,7 +1,7 @@
 defult_click_point:
   x: 285
   y: 495
-method: check
+method: None
 picture_path: images/bow_training_complete_window.png
 region:
   bottom: 512

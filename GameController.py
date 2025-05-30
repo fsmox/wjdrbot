@@ -541,7 +541,7 @@ class GameController:
         ]
 
         GameWindows = self.GameWindows
-        defult_count_down = 60 * 60 * 2  # 默认冷却时间为10分钟
+        defult_count_down = 60 * 60 * 5  # 默认冷却时间为10分钟
         city = GameWindows["city"]
         # if not city.CurrentWindowIsMe():
         #     city.open()
@@ -599,9 +599,8 @@ class GameController:
         close_left_window = self.GetWindow("CloseLeftWindow")
 
         left_window.open()
-        if left_window_city.CurrentWindowIsMe():
-            left_window_world.open()
-        if not left_window_world.CurrentWindowIsMe():
+        time.sleep(0.5)
+        if not left_window_world.open():
             log("左侧窗口打开失败")
             return False
         if FreeArmyQueue.CurrentWindowIsMe():
@@ -621,14 +620,12 @@ class GameController:
 
         collection_type_list = ["meat", "wood", "coal", "iron"]
         self.GoToCity()
+        cool_time = []
         if not self.ExsitedFreeArmyQueue():
             log("没有空闲行军队列，无法进行采集")
             return cool_time
         GameWindows = self.GameWindows
         GameWindows["world"].open()
-        cool_time = []
-
-
         
         if not "collection_Step7" in GameWindows:
             collection_window = {}
@@ -664,7 +661,7 @@ class GameController:
             else:
                 cool_time.append(cool_time_task)
         if need_run_again:
-            cool_time.append(2*60)
+            cool_time.append(5*60)
         return cool_time
 
     def InReconnectWindow(self):
@@ -727,14 +724,15 @@ class GameController:
     def __Train_sub(self):
         GameWindows = self.GameWindows
         for i in range(1,4):
-            training_window = GameWindows.get(f"train_Step{i}", self.RegisterWindow(f"train_Step{i}"))
+            training_window = self.GetWindow(f"train_Step{i}")
             if i == 1:
-                for j in range(5):
-                    open = training_window.open()
-                    if open:
-                        x,y = training_window.open_XY
-                        training_window.windwow_controller.tap(x,y)
-                        break
+                open = training_window.open()
+                if open:
+                    time.sleep(1)
+                    x,y = training_window.open_XY
+                    training_window.windwow_controller.tap(x,y)
+                    training_window.windwow_controller.tap(x,y)
+                    training_window.windwow_controller.tap(x,y)
             else:
                 open = training_window.open()
             if not open:
@@ -761,13 +759,16 @@ class GameController:
 
         
         left_window.open()
-        if left_window_world.CurrentWindowIsMe():
-            left_window_city.open()
+        time.sleep(0.5)
+        if not left_window_city.open():
+            log("左侧窗口打开失败")
         if training_complete_window.CurrentWindowIsMe():
             x,y = training_complete_window.judge_point
             training_complete_window.windwow_controller.tap(x,y)
             ok , cool_down = self.__Train_sub()
         else:
+            left_window_close = self.GetWindow("CloseLeftWindow")
+            left_window_close.open()
             cool_down = 10*60
     
         return cool_down 
@@ -783,6 +784,24 @@ class GameController:
     def Task_train_bow(self):
         return self.__Train("bow")
     
+    def __add_cool_dow_time_to_cool_down_list(self,cool_down_list,cool_down,threshod=60*20):
+        skip = False
+        for c_time in cool_down_list:
+            if abs(cool_down - c_time) < threshod:
+                skip = True
+                break
+        if not skip:
+            cool_down_list.append(cool_down)
+    def Task_train(self):
+        cool_down_list = []
+        cool_down = self.__Train("shield")
+        self.__add_cool_dow_time_to_cool_down_list(cool_down_list,cool_down)
+        cool_down = self.__Train("spear")
+        self.__add_cool_dow_time_to_cool_down_list(cool_down_list,cool_down)
+        cool_down = self.__Train("bow")
+        self.__add_cool_dow_time_to_cool_down_list(cool_down_list,cool_down)
+        
+        return cool_down_list
 
 
     def GoToCity(self):
@@ -1048,7 +1067,7 @@ class ImageJudge:
             self.save_path = config.get("save_path",f"AI_Data/images/{name}")
             self.label_path = config.get("label_path",f"AI_Data/labels/{name}")
 
-    def Existed(self, screen):
+    def Existed(self, screenshot):
 
         existed = False
         center_x = 0
@@ -1060,7 +1079,12 @@ class ImageJudge:
                 center_y = self.defult_location["y"]
             else:
                 existed = False
-
+            return existed, center_x, center_y
+        screen = screenshot()
+        # 检查屏幕截图是否有效
+        if screen is None or screen.size == 0:
+            log("获取屏幕截图失败")
+            return False, center_x, center_y
         if self.method == "check" or self.method == "swipe_check":
             existed = self.check_image(screen)
             center_x = (self.region['left'] + self.region['right']) // 2
@@ -1343,20 +1367,16 @@ class GameWindow:
         self.open_config = open_config
         self.in_window_config = in_window_config
         self.cool_down_config = cool_down_config
-        self.open_XY = None
+        self.open_XY = (open_config["defult_click_point"]["x"],open_config["defult_click_point"]["y"])
 
-    def CurrentWindowIsMe(self):
+    def CurrentWindowIsMe(self,enable_cache=True):
         """判断当前窗口是否是我"""
-        # 获取屏幕截图
-        screen = self.windwow_controller.screenshot()
-        # 检查屏幕截图是否有效
-        if screen is None or screen.size == 0:
-            log("获取屏幕截图失败")
-            return False
-        
+
         judge = ImageJudge(self.in_window_config,f"{self.window_name}_in_window")
         # 检查当前窗口是否是我
-        existed,x,y = judge.Existed(screen)
+        # 获取屏幕截图
+        screenshot = lambda: self.windwow_controller.screenshot(enable_cache)
+        existed,x,y = judge.Existed(screenshot)
         self.judge_point = (x,y)
         return existed
 
@@ -1367,8 +1387,8 @@ class GameWindow:
             in_window_config = yaml.safe_load(f)
         # return_button = GameWindow(window_name, None, in_window_config, None, self.windwow_controller)
         judge = ImageJudge(in_window_config,f"{self.window_name}_in_window")
-        screen = self.windwow_controller.screenshot()
-        existed,x,y = judge.Existed(screen)
+        screenshot = self.windwow_controller.screenshot
+        existed,x,y = judge.Existed(screenshot)
         if existed:
             log(f"点击{window_name}按钮")
             self.windwow_controller.tap(x,y)
@@ -1399,7 +1419,7 @@ class GameWindow:
         if self.cool_down_config is None:
             return default_cool_down_time # 默认冷却时间为10分钟
         # 获取屏幕截图
-        screen = self.windwow_controller.screenshot()
+        screen = self.windwow_controller.screenshot(enable_cache=False)
         # 检查屏幕截图是否有效
         if screen is None or screen.size == 0:
             log("获取屏幕截图失败")
@@ -1422,7 +1442,7 @@ class GameWindow:
         if judge.method == "swipe_check" or judge.method == "swipe_find":
             for i in range(3):
                 log(f"第{i+1}次检查{self.window_name}窗口")
-                existed,x,y = judge.Existed(self.windwow_controller.screenshot())
+                existed,x,y = judge.Existed(self.windwow_controller.screenshot)
                 if existed:
                     break
                 start_x = self.open_config["swipe"]["start"]["x"]
@@ -1434,25 +1454,30 @@ class GameWindow:
                 time.sleep(1)
                 # 先滑动到窗口位置
             if not existed:
-                existed,x,y = judge.Existed(self.windwow_controller.screenshot())
-            
+                existed,x,y = judge.Existed(self.windwow_controller.screenshot)
+        elif judge.method == "None":
+            existed,x,y = True, judge.defult_location["x"], judge.defult_location["y"]
         else:
-            existed,x,y = judge.Existed(self.windwow_controller.screenshot())
+            existed,x,y = judge.Existed(self.windwow_controller.screenshot)
         
         if not existed:
-            log(f"没检测到{self.window_name}窗口打开图标，无法打开{self.window_name}窗口")
-            return False
+            if self.CurrentWindowIsMe(enable_cache=False):
+                return True
+            else:
+                log(f"没检测到{self.window_name}窗口打开图标，无法打开{self.window_name}窗口")
+                return False
         
 
         self.windwow_controller.tap(x,y)
         self.open_XY =(x,y)
         for i in range(Operation_interval):
             log(f"第{i+1}次检查游戏窗口")
-            task_found = self.CurrentWindowIsMe()
+            task_found = self.CurrentWindowIsMe(enable_cache=False)
             if task_found:
                 log(f"{self.window_name}窗口已打开")
                 break
             time.sleep(0.5)
+            
 
         return True
 

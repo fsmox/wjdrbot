@@ -55,7 +55,7 @@ class WindowsController:
             pyautogui.moveTo(real_x, real_y, duration=0.1)
             pyautogui.click()
     
-    def screenshot(self):
+    def screenshot(self,enable_cache = True):
         # 获取屏幕截图
         left = self.selected_window.left
         top = self.selected_window.top

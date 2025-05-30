@@ -6,11 +6,17 @@ import re
 import cv2
 from GlobalConfig import *
 from logger import log
+from datetime import datetime, timedelta
 
 class ADBController:
     def __init__(self,user_id=None):
         self.user_id = user_id
+        self.set_op()
         self.check_adb_connection()
+
+    def set_op(self):
+        self.last_op_time = datetime.now()
+        self.op_after_capture = True
     
     def active(self):
         cmd = ['adb', 'shell', 'am', 'start', '--user', str(self.user_id), '-n', 'com.gof.china/com.unity3d.player.DDUnityLaunchActivity']
@@ -18,11 +24,13 @@ class ADBController:
             subprocess.run(cmd, check=True)
         except subprocess.CalledProcessError:
             raise Exception("窗口激活失败")
+        self.set_op()
     def check_adb_connection(self):
         try:
             cmd = ['adb', 'connect', '127.0.0.1:7555']
             subprocess.run(cmd, check=True)
             subprocess.run(['adb', 'devices'], check=True)
+            
         except subprocess.CalledProcessError:
             raise Exception("ADB 连接失败，请检查设备连接状态")
     
@@ -40,9 +48,17 @@ class ADBController:
         log(f"点击位置: ({x}, {y})")
         # 使用adb命令模拟点击
         subprocess.run(['adb', 'shell', 'input', 'tap', str(x), str(y)])
+        self.set_op()
     
-    def screenshot(self):
+    def screenshot(self,enable_cache = True):
         # 获取原始截图字节
+        capture_time = datetime.now() 
+        if ( not self.op_after_capture and 
+            enable_cache and 
+            (capture_time - self.last_op_time > timedelta(seconds=5))):
+            if capture_time - self.last_capture_time < timedelta(seconds=30):
+                return self.last_img 
+            
         result = subprocess.run(['adb', 'shell', 'screencap', '-p'], capture_output=True)
         img_bytes = result.stdout
 
@@ -53,7 +69,6 @@ class ADBController:
         if not img_bytes.startswith(b'\x89PNG'):
             log("ADB截图失败，输出内容不是PNG图片。请检查ADB连接和设备。")
             return None
-
         # 转为图片
         image = Image.open(io.BytesIO(img_bytes))
         self.width,  self.height= image.size
@@ -62,8 +77,11 @@ class ADBController:
         img_resized = cv2.resize(image_np, (Capture_width, Capture_height))
         # 将图片转换为BGR模式
         image_bgr = cv2.cvtColor(img_resized, cv2.COLOR_RGBA2RGB)
+        self.op_after_capture = False
+        self.last_img = image_bgr
+        self.last_capture_time = capture_time
         
-        return np.array(image_bgr)
+        return image_bgr
         
     
     def get_current_app(self):
@@ -111,6 +129,7 @@ class ADBController:
             str(end_x), str(end_y),
             str(duration)
         ])
+        self.set_op()
 
     def long_press(self, x, y, duration=1000):
         """
@@ -125,3 +144,4 @@ class ADBController:
             str(x), str(y), str(x), str(y),
             str(duration)
         ])
+        self.set_op()
