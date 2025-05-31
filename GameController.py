@@ -517,7 +517,14 @@ class GameController:
     def Task_AllianceTechnology(self):
         if self.InReconnectWindow():
             return 5*60
-        # self.ReturnToCity()
+        city = self.GetWindow("city")
+        world = self.GetWindow("world")
+        if( city.CurrentWindowIsMe() or  
+            world.CurrentWindowIsMe() ):
+            pass
+        else:
+            if not city.open():
+                return 60*5
         self.OpenAllianceWindow()
         self.OpenAllianceTechnologyWindow()
         self.ClickAllianceTechnologyRecommendButton()
@@ -543,8 +550,13 @@ class GameController:
         GameWindows = self.GameWindows
         defult_count_down = 60 * 60 * 5  # 默认冷却时间为10分钟
         city = GameWindows["city"]
-        # if not city.CurrentWindowIsMe():
-        #     city.open()
+        world = self.GetWindow("world")
+        if( city.CurrentWindowIsMe() or  
+            world.CurrentWindowIsMe() ):
+            pass
+        else:
+            if not city.open():
+                return 60*5
         
         for point in click_point_list:
             x, y = point["x"], point["y"]
@@ -622,10 +634,29 @@ class GameController:
 
         collection_type_list = ["meat", "wood", "coal", "iron"]
         self.GoToCity()
-        cool_time = []
-        if not self.ExsitedFreeArmyQueue():
+        cool_time = 5*60
+
+        if not self.__OpenLeftWinow_World():
+            return cool_time
+
+        FreeArmyQueueNum = self.__CheckFreeArmyQueueNum()
+        if FreeArmyQueueNum == 0:
             log("没有空闲行军队列，无法进行采集")
             return cool_time
+        
+        collection_plan_list = []
+        for collection_type in collection_type_list:
+            doing_window = self.GetWindow(f"{collection_type}_collection_doing")
+            if not doing_window.CurrentWindowIsMe():
+                collection_plan_list.append(collection_type)
+        
+        if len(collection_plan_list) > FreeArmyQueueNum:
+            collection_plan_list = random.sample(collection_plan_list, FreeArmyQueueNum)
+        
+        if len(collection_plan_list) == 0:
+            return []
+        log(f"计划采集项目:{collection_plan_list}")
+        cool_time = []
         GameWindows = self.GameWindows
         GameWindows["world"].open()
         
@@ -641,9 +672,9 @@ class GameController:
                 collection_window[f"{collection_type}_collection_doing"] = None
             RegisterWindow(collection_window, window_controller=self.windwow_controller, GameWindows=self.GameWindows)
         need_run_again = False
-        for collection_type in collection_type_list:
-            if GameWindows[f"{collection_type}_collection_doing"].CurrentWindowIsMe():
-                continue
+        for collection_type in collection_plan_list:
+            # if self.GetWindow(f"{collection_type}_collection_doing").CurrentWindowIsMe():
+            #     continue
             for i in range(1,8):
                 if i == 2:
                     window_name = f"{collection_type}_collection_Step2"
@@ -697,25 +728,13 @@ class GameController:
             if window_free_quee.CurrentWindowIsMe():
                 free_quee_num += 1
         self.free_quee_num = free_quee_num
+        return free_quee_num
 
     def Task_FreeArmyQueue(self):
         self.GoToCity()
         if not self.__OpenLeftWinow_World():
             return 60 * 5
         
-
-            #     cool_down_time_list.append(0)
-            # else:
-            #     pass
-                # cool_down_time_list.append(window_free_quee.GetCoolDownTime(0))
-
-        # log(f"空闲军队数量:{free_quee_num}")
-
-
-
-
-
-
     def InReconnectWindow(self):
         reconnect_window = self.GetWindow("reconcect")
         return reconnect_window.CurrentWindowIsMe()
@@ -1515,7 +1534,13 @@ class GameWindow:
             existed,x,y = judge.Existed(self.windwow_controller.screenshot)
         
         if self.in_window_config is None:
-            return True
+            if existed:
+                self.windwow_controller.tap(x,y)
+                self.open_XY =(x,y)
+                time.sleep(0.5)
+                return True
+            else:
+                return False
 
         if not existed:
             if self.CurrentWindowIsMe(enable_cache=False):
@@ -1533,7 +1558,7 @@ class GameWindow:
             if task_found:
                 log(f"{self.window_name}窗口已打开")
                 break
-            time.sleep(0.5)
+            # time.sleep(0.5)
             
 
         return True
@@ -1584,6 +1609,7 @@ def RegisterWindow(windows_config,window_controller=None,GameWindows=None):
 
 
 from adb_controller import ADBController
+import random
 
 if __name__ == "__main__":
     adb_controller = ADBController()
@@ -1591,7 +1617,7 @@ if __name__ == "__main__":
     # print(game_controller.Task_train_shield())
     # print(game_controller.Task_train_spear())
     # print(game_controller.Task_train_bow())
-    game_controller.Task_FreeArmyQueue()
+    game_controller.Task_collection()
     
     # GameWindows_test = {
     #     "city":None,

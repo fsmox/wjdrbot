@@ -41,6 +41,7 @@ class task_executor:
         """
         count_down = 5*60
         self.job_count -= 1
+        log(f"{self.name}开始执行")
         try:
             if self.befor is not None:
                 self.befor()
@@ -66,10 +67,11 @@ class task_executor:
             self.set_run_time(count_down)
         if self.job_count == 0:
             self.set_run_time(5*60)
-        
+        log(f"{self.name}开始执行")
+        log(f"{self.name}执行结束")
     def set_run_time(self,run_time):
         next_run_time = datetime.now() + timedelta(seconds=run_time)
-        print(f"Next run time: {next_run_time}")
+        print(f"{self.name} Next run time: {next_run_time}")
         job = self.scheduler.add_job(self.execute_task, trigger='date', name=self.name,run_date=next_run_time, misfire_grace_time=3600)
         # jod_id = job.id
         # job_name_dic[jod_id] = self.name

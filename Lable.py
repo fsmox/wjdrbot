@@ -67,7 +67,7 @@ judge_type_menu.grid(row=3, column=2, sticky="w")
 def recapture_image():
     global screenshot, img_rgb, gray, blurred, edges, closed, labeled, tk_img
     # 重新截图
-    screenshot = controller.screenshot()
+    screenshot = controller.screenshot(False)
     img_rgb = np.array(screenshot)
     gray = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2GRAY)
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
