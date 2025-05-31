@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 135
+  y: 280
+method: None
+picture_path: images/alliance_Step9_open.png
+region:
+  bottom: 290
+  left: 88
+  right: 182
+  top: 271
+swipe: null
+threshold: 0.8
+window_name: alliance_Step9

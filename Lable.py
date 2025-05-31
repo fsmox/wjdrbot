@@ -426,8 +426,7 @@ def test_dataset():
     for i in range(1,step_num+1):
         window_name_step = f"{window_name}_Step{i}"
         window = game_controller.RegisterWindow(window_name_step)
-        window.open()
-        if not window.CurrentWindowIsMe():
+        if not window.open():
             print(f"{window_name_step}打开失败")
             return
 

@@ -183,7 +183,7 @@ if __name__ == "__main__":
             GoToCxd = game_controller.GoToCXD
         exe = task_executor_new(game_controller.Task_WarehouseRewards,after=GoToCxd)
         exe_list.append(exe)
-        exe = task_executor_new(game_controller.Task_AllianceTechnology)
+        exe = task_executor_new(game_controller.Task_Alliance)
         exe_list.append(exe)
         # exe = task_executor(scheduler,game_controller.Task_RefreshAllianceMobilization,GoToCXD=GoToCxd)
         # exe_list.append(exe)
@@ -195,6 +195,9 @@ if __name__ == "__main__":
         exe_list.append(exe)
         exe = task_executor_new(game_controller.Task_train,after=GoToCxd)
         exe_list.append(exe)
+        if user_id == 10:
+            exe = task_executor_new(game_controller.Task_AttackIceBeast,after=GoToCxd)
+            exe_list.append(exe)
 
     try:
         print("Scheduler started. Press Ctrl+C to exit.")

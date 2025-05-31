@@ -514,6 +514,26 @@ class GameController:
         return 5*60
 
 
+    def Task_Alliance(self):
+        cool_time_error = 5*60
+        for i in range(1,14):
+            name = f"alliance_Step{i}"
+            window = self.GetWindow(name)
+            if window.open():
+                if i == 4:
+                    x , y = window.open_XY
+                    self.windwow_controller.long_press(x , y, 5*1000)
+            else:
+                if 8 <= i <= 10:
+                    pass
+                else:
+                    window.ClikReturnButton()
+                    window.ClikReturnButton()
+                    return cool_time_error
+                
+        return 2 * 60 * 60
+        
+
     def Task_AllianceTechnology(self):
         if self.InReconnectWindow():
             return 5*60
@@ -619,7 +639,8 @@ class GameController:
                 log("收取体力失败")
                 return False
 
-        now_time_hour = datetime.now().hour
+        # now_time_hour = datetime.now().hour
+        now_time_hour = 16
         if now_time_hour < 6:
             self.canned_collected_AM = False
             self.canned_collected_PM = False
@@ -658,7 +679,45 @@ class GameController:
         close_left_window.open()
         
         return re
+    
+    def Task_AttackIceBeast(self):
+        """
+        攻击冰原巨兽任务
+        """
+        cool_time_error = 5 * 60
+        if self.InReconnectWindow():
+            return cool_time_error
+
+        self.GoToCity()
+
+        stamina_threshold = self.GetWindow("stamina_threshold")
+        if not stamina_threshold.CurrentWindowIsMe():
+            return 60 * 60
         
+        if not self.__OpenLeftWinow_World():
+            return cool_time_error
+        
+        FreeArmyQueueNum = self.__CheckFreeArmyQueueNum()
+        if FreeArmyQueueNum == 0:
+            log("暂无行军队列")
+            return cool_time_error
+        
+        window_sequense = [
+            "world",
+            "collection_Step1",
+        ]
+        window_sequense_temp = [f"AttackIceBeast_Step{i}" for i in range(1,7)]
+        window_sequense += window_sequense_temp
+        for window_name in window_sequense:
+            window = self.GetWindow(window_name)
+            if not window.open():
+                return cool_time_error
+        time.sleep(0.5)
+        if stamina_threshold.CurrentWindowIsMe():
+            return 10 * 60
+        else:
+            return 60 * 60
+       
 
     def Task_collection(self):
 
@@ -1614,11 +1673,11 @@ class GameWindow:
             task_found = self.CurrentWindowIsMe(enable_cache=False)
             if task_found:
                 log(f"{self.window_name}窗口已打开")
-                break
+                return True
             # time.sleep(0.5)
             
-
-        return True
+        return False
+        
 
     def return_to_father_window(self):
         pass
@@ -1674,7 +1733,7 @@ if __name__ == "__main__":
     # print(game_controller.Task_train_shield())
     # print(game_controller.Task_train_spear())
     # print(game_controller.Task_train_bow())
-    game_controller.Task_WarehouseRewards()
+    game_controller.Task_Alliance()
     
     # GameWindows_test = {
     #     "city":None,
