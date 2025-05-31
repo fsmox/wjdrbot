@@ -566,40 +566,73 @@ class GameController:
         # self.GoToCity()
         return defult_count_down
     
+    canned_collected_AM = False
+    canned_collected_PM = False
     def Task_WarehouseRewards(self):
         """领取仓库奖励"""
+        cool_time_error = 5*60
+
+        window_sequence = [
+            self.InReconnectWindow,
+            self.ReturnToCity,
+            self.__OpenLeftWinow_City,
+            "warehouse",
+            "warehouse_rewards",
+        ]
+        # if not hasattr(self, 'canned_collected_AM'):
+        #     self.canned_collected_AM = False
+        #     self.canned_collected_PM = False
 
         if self.InReconnectWindow():
-            return 5*60
+            return cool_time_error
 
-        left_window_city = self.GetWindow("left_window_city")
-        left_window_world = self.GetWindow("left_window_world")
-        GameWindows = self.GameWindows
-        defult_count_down = 5*60
-        city = GameWindows["city"]
-        if not city.CurrentWindowIsMe():
-            city.open()
-        if not GameWindows["world"].open():
-            return defult_count_down
-        GameWindows["left_window"].open()
-        if left_window_city.CurrentWindowIsMe():
-            pass
-        elif left_window_world.CurrentWindowIsMe():
-            left_window_city.open()
-        else:
-            pass
+        if not self.ReturnToCity():
+            return cool_time_error
         
-        if not left_window_city.CurrentWindowIsMe():
-            log("左侧城市窗口打开失败")
-            return False
-        GameWindows["warehouse_rewards"].open()
-        conunt_down = GameWindows["warehouse_rewards"].GetCoolDownTime()
-        x, y = city.open_config["defult_click_point"]["x"], city.open_config["defult_click_point"]["y"]
-        city.windwow_controller.tap(x,y)
+        if not self.__OpenLeftWinow_City():
+            return cool_time_error
+        
+        warehouse = self.GetWindow("warehouse")
+
+        if not warehouse.open():
+            return cool_time_error
+        
+        warehouse_rewards = self.GetWindow("warehouse_rewards")
+
+        if not warehouse_rewards.open():
+            return cool_time_error
+        
+        conunt_down = warehouse_rewards.GetCoolDownTime()
+        DefultClickPoint = warehouse_rewards.GetDefultClickPoint()
+        warehouse_rewards.windwow_controller.tap(DefultClickPoint["x"],DefultClickPoint["y"])
         conunt_down = min(conunt_down, 2*60*60)
         conunt_down = max(conunt_down, 2*60)
-        # self.GoToCity()
+
+        def collect_canned():
+            canned = self.GetWindow("canned")
+            if canned.open():
+                log("收取体力失败")
+                x,y = canned.judge_point
+                self.windwow_controller.tap(x,y)
+                return True
+            else:
+                log("收取体力失败")
+                return False
+
+        now_time_hour = datetime.now().hour
+        if now_time_hour < 6:
+            self.canned_collected_AM = False
+            self.canned_collected_PM = False
+        elif now_time_hour >= 13:
+            self.canned_collected_AM = True
         
+        if ( not self.canned_collected_AM  and ( 9 < now_time_hour ) ):
+            collect_canned()
+            self.canned_collected_AM = True
+        elif ( not self.canned_collected_PM  and ( 15 < now_time_hour < 19  ) ):
+            collect_canned()
+            self.canned_collected_PM = True
+
         log(f"冷却时间: {conunt_down}秒")
         return conunt_down
     
@@ -734,7 +767,31 @@ class GameController:
         self.GoToCity()
         if not self.__OpenLeftWinow_World():
             return 60 * 5
+    def Task_canned(self):
+        cool_time_error = 5*60
+
+        if not self.GoToCity():
+            return cool_time_error
         
+        # 定义窗口序列
+        window_sequence = [
+            "left_window",
+            "left_window_city",
+            "Technology_reserach_center",
+            "warehouse",
+            "canned"
+        ]
+        cool_time = []
+        for window_name in window_sequence:
+            window = self.GetWindow(window_name)
+            if not window.open():
+                cool_time = cool_time_error
+                self.GoToCity()
+                break
+        
+        return cool_time
+
+
     def InReconnectWindow(self):
         reconnect_window = self.GetWindow("reconcect")
         return reconnect_window.CurrentWindowIsMe()
@@ -1617,7 +1674,7 @@ if __name__ == "__main__":
     # print(game_controller.Task_train_shield())
     # print(game_controller.Task_train_spear())
     # print(game_controller.Task_train_bow())
-    game_controller.Task_collection()
+    game_controller.Task_WarehouseRewards()
     
     # GameWindows_test = {
     #     "city":None,

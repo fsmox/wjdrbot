@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 108
+  y: 487
+method: check
+picture_path: images/warehouse_window.png
+region:
+  bottom: 521
+  left: 80
+  right: 137
+  top: 453
+swipe: null
+threshold: 0.8
+window_name: warehouse
