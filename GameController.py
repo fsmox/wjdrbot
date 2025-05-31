@@ -584,6 +584,8 @@ class GameController:
         conunt_down = GameWindows["warehouse_rewards"].GetCoolDownTime()
         x, y = city.open_config["defult_click_point"]["x"], city.open_config["defult_click_point"]["y"]
         city.windwow_controller.tap(x,y)
+        conunt_down = min(conunt_down, 2*60*60)
+        conunt_down = max(conunt_down, 2*60)
         # self.GoToCity()
         
         log(f"冷却时间: {conunt_down}秒")
@@ -663,6 +665,56 @@ class GameController:
         if need_run_again:
             cool_time.append(5*60)
         return cool_time
+
+    def __OpenLeftWinow_City(self):
+        left_window = self.GetWindow("left_window")
+        left_window_city = self.GetWindow("left_window_city")
+
+        left_window.open()
+        time.sleep(0.5)
+        if not left_window_city.open():
+            log("左侧城市窗口打开失败")
+            return False
+        else:
+            return True
+
+    def __OpenLeftWinow_World(self):
+        left_window = self.GetWindow("left_window")
+        left_window_world = self.GetWindow("left_window_world")
+
+        left_window.open()
+        time.sleep(0.5)
+        if not left_window_world.open():
+            log("左侧野外窗口打开失败")
+            return False
+        else:
+            self.__CheckFreeArmyQueueNum()
+            return True
+    def __CheckFreeArmyQueueNum(self):
+        window_free_quee_list = [ self.GetWindow(f"free_quee_{i}") for i in range(1,7) ]
+        free_quee_num = 0
+        for window_free_quee in window_free_quee_list:
+            if window_free_quee.CurrentWindowIsMe():
+                free_quee_num += 1
+        self.free_quee_num = free_quee_num
+
+    def Task_FreeArmyQueue(self):
+        self.GoToCity()
+        if not self.__OpenLeftWinow_World():
+            return 60 * 5
+        
+
+            #     cool_down_time_list.append(0)
+            # else:
+            #     pass
+                # cool_down_time_list.append(window_free_quee.GetCoolDownTime(0))
+
+        # log(f"空闲军队数量:{free_quee_num}")
+
+
+
+
+
 
     def InReconnectWindow(self):
         reconnect_window = self.GetWindow("reconcect")
@@ -1367,7 +1419,7 @@ class GameWindow:
         self.open_config = open_config
         self.in_window_config = in_window_config
         self.cool_down_config = cool_down_config
-        self.open_XY = (open_config["defult_click_point"]["x"],open_config["defult_click_point"]["y"])
+        self.open_XY = (open_config["defult_click_point"]["x"],open_config["defult_click_point"]["y"]) if not open_config  is None else None
 
     def CurrentWindowIsMe(self,enable_cache=True):
         """判断当前窗口是否是我"""
@@ -1413,9 +1465,8 @@ class GameWindow:
             return False
         return self.father_window.CurrentWindowIsMe()
 
-    def GetCoolDownTime(self):
+    def GetCoolDownTime(self,default_cool_down_time=60 * 10):
         """获取冷却时间"""
-        default_cool_down_time = 60 * 10 # 默认冷却时间为10分钟
         if self.cool_down_config is None:
             return default_cool_down_time # 默认冷却时间为10分钟
         # 获取屏幕截图
@@ -1540,7 +1591,7 @@ if __name__ == "__main__":
     # print(game_controller.Task_train_shield())
     # print(game_controller.Task_train_spear())
     # print(game_controller.Task_train_bow())
-    game_controller.Task_collection()
+    game_controller.Task_FreeArmyQueue()
     
     # GameWindows_test = {
     #     "city":None,
