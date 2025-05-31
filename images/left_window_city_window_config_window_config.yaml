@@ -2,7 +2,7 @@ defult_click_point:
   x: 21
   y: 224
 method: check
-picture_path: images/left_window_city_window.png
+picture_path: images/left_window_city_window_config_window.png
 region:
   bottom: 235
   left: 10
@@ -10,4 +10,4 @@ region:
   top: 214
 swipe: null
 threshold: 0.8
-window_name: left_window_city
+window_name: left_window_city_window_config

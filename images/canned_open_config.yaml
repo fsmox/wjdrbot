@@ -1,6 +1,6 @@
 defult_click_point:
-  x: 219
-  y: 320
+  x: 253
+  y: 381
 method: None
 picture_path: images/canned_open.png
 region:

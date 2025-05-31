@@ -16,5 +16,5 @@ swipe:
   start:
     x: 160
     y: 540
-threshold: 0.8
+threshold: 0.89
 window_name: warehouse

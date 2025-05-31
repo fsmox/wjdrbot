@@ -639,8 +639,8 @@ class GameController:
                 log("收取体力失败")
                 return False
 
-        # now_time_hour = datetime.now().hour
-        now_time_hour = 16
+        now_time_hour = datetime.now().hour
+        # now_time_hour = 16
         if now_time_hour < 6:
             self.canned_collected_AM = False
             self.canned_collected_PM = False
@@ -793,8 +793,9 @@ class GameController:
         left_window = self.GetWindow("left_window")
         left_window_city = self.GetWindow("left_window_city")
 
-        left_window.open()
-        time.sleep(0.5)
+        if not left_window.CurrentWindowIsMe():
+            left_window.open()
+        # time.sleep(1)
         if not left_window_city.open():
             log("左侧城市窗口打开失败")
             return False
@@ -805,8 +806,9 @@ class GameController:
         left_window = self.GetWindow("left_window")
         left_window_world = self.GetWindow("left_window_world")
 
-        left_window.open()
-        time.sleep(0.5)
+        if not left_window.CurrentWindowIsMe():
+            left_window.open()
+        # time.sleep(1)
         if not left_window_world.open():
             log("左侧野外窗口打开失败")
             return False
@@ -918,7 +920,9 @@ class GameController:
                     time.sleep(1)
                     x,y = training_window.open_XY
                     training_window.windwow_controller.tap(x,y)
+                    time.sleep(0.5)
                     training_window.windwow_controller.tap(x,y)
+                    time.sleep(0.5)
                     training_window.windwow_controller.tap(x,y)
             else:
                 open = training_window.open()
@@ -1733,7 +1737,7 @@ if __name__ == "__main__":
     # print(game_controller.Task_train_shield())
     # print(game_controller.Task_train_spear())
     # print(game_controller.Task_train_bow())
-    game_controller.Task_Alliance()
+    game_controller.Task_FreeArmyQueue()
     
     # GameWindows_test = {
     #     "city":None,
