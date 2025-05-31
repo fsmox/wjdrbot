@@ -1,13 +1,12 @@
 defult_click_point:
   x: 385
   y: 853
-method: None
-picture_path: null
+method: check
+picture_path: images/world_window.png
 region:
-  bottom: 880
-  left: 285
-  right: 485
-  top: 827
-swipe: null
+  bottom: 890
+  left: 430
+  right: 486
+  top: 820
 threshold: 0.8
 window_name: collection_Step7

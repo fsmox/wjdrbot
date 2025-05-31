@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 24
-  y: 234
+  x: 32
+  y: 366
 method: find
 picture_path: images/iron_collection_doing_window.png
 region:
-  bottom: 248
-  left: 9
-  right: 39
-  top: 220
+  bottom: 379
+  left: 18
+  right: 46
+  top: 354
 swipe: null
 threshold: 0.8
 window_name: iron_collection_doing

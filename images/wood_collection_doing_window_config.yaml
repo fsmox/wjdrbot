@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 24
-  y: 231
+  x: 32
+  y: 469
 method: find
 picture_path: images/wood_collection_doing_window.png
 region:
-  bottom: 244
-  left: 11
-  right: 37
-  top: 219
+  bottom: 479
+  left: 21
+  right: 43
+  top: 459
 swipe: null
 threshold: 0.8
 window_name: wood_collection_doing
