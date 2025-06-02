@@ -1,6 +1,6 @@
 from GlobalConfig import *
 from windows_controller import WindowsController
-from logger import log
+from logger import log,Info,logger
 import cv2
 from datetime import datetime
 import os
@@ -205,7 +205,7 @@ class GameController:
         self.player_score = 0
         self.level = 1
         self.save_images = save_images  # 是否保存图片
-        self.save_path = "images/tmp"
+        self.save_path = r"C:\SoftDev\wjdrbot_temp_Data\temp"
         self.set_game_windows()
 
     def set_game_windows(self):
@@ -523,6 +523,10 @@ class GameController:
                 if i == 4:
                     x , y = window.open_XY
                     self.windwow_controller.long_press(x , y, 5*1000)
+                if i==8:
+                    for _ in range(20):
+                        if not window.open():
+                            break
             else:
                 if 8 <= i <= 10:
                     pass
@@ -630,17 +634,19 @@ class GameController:
 
         def collect_canned():
             canned = self.GetWindow("canned")
-            if canned.open():
-                log("收取体力失败")
-                x,y = canned.judge_point
-                self.windwow_controller.tap(x,y)
-                return True
+            warehouse = self.GetWindow("warehouse")
+            for i in range(3):
+                if canned.open():
+                    x,y = canned.judge_point
+                    self.windwow_controller.tap(x,y)
+                    log("收取体力成功")
+                    return True
             else:
                 log("收取体力失败")
                 return False
 
         now_time_hour = datetime.now().hour
-        # now_time_hour = 16
+        now_time_hour = 16
         if now_time_hour < 6:
             self.canned_collected_AM = False
             self.canned_collected_PM = False
@@ -648,12 +654,13 @@ class GameController:
             self.canned_collected_AM = True
         
         if ( not self.canned_collected_AM  and ( 9 < now_time_hour ) ):
-            collect_canned()
-            self.canned_collected_AM = True
+            if collect_canned():
+                self.canned_collected_AM = True
         elif ( not self.canned_collected_PM  and ( 15 < now_time_hour < 19  ) ):
-            collect_canned()
-            self.canned_collected_PM = True
+            if collect_canned():
+                self.canned_collected_PM = True
 
+        Info("仓库任务正常结束")
         log(f"冷却时间: {conunt_down}秒")
         return conunt_down
     
@@ -789,32 +796,26 @@ class GameController:
             cool_time.append(5*60)
         return cool_time
 
-    def __OpenLeftWinow_City(self):
+    def __left_window_op(self,sub_window_name):
         left_window = self.GetWindow("left_window")
-        left_window_city = self.GetWindow("left_window_city")
+        left_window_sub = self.GetWindow(sub_window_name)
 
         if not left_window.CurrentWindowIsMe():
             left_window.open()
-        # time.sleep(1)
-        if not left_window_city.open():
-            log("左侧城市窗口打开失败")
-            return False
-        else:
-            return True
+        if not left_window_sub.CurrentWindowIsMe():
+            if not left_window_sub.open():
+                log("左侧城市窗口打开失败")
+                return False
+            
+        return True
+    def __OpenLeftWinow_City(self):
+            
+        return self.__left_window_op("left_window_city")
 
     def __OpenLeftWinow_World(self):
-        left_window = self.GetWindow("left_window")
-        left_window_world = self.GetWindow("left_window_world")
 
-        if not left_window.CurrentWindowIsMe():
-            left_window.open()
-        # time.sleep(1)
-        if not left_window_world.open():
-            log("左侧野外窗口打开失败")
-            return False
-        else:
-            self.__CheckFreeArmyQueueNum()
-            return True
+        return self.__left_window_op("left_window_world")
+    
     def __CheckFreeArmyQueueNum(self):
         window_free_quee_list = [ self.GetWindow(f"free_quee_{i}") for i in range(1,7) ]
         free_quee_num = 0
@@ -857,7 +858,7 @@ class GameController:
         reconnect_window = self.GetWindow("reconcect")
         return reconnect_window.CurrentWindowIsMe()
     def Task_Reconnect(self):
-        count_down = 60*5
+        count_down = 60*10
         reconnect_window = self.GetWindow("reconcect")
         if reconnect_window.CurrentWindowIsMe():
             click_point = reconnect_window.GetDefultClickPoint()
@@ -888,8 +889,8 @@ class GameController:
         if ((not city.CurrentWindowIsMe()) and 
             (not world.CurrentWindowIsMe())):
             self.GoToCity()
-        
-        left_window.open()
+        if not left_window.CurrentWindowIsMe():
+            left_window.open()
         if left_window_city.CurrentWindowIsMe():
             pass
         elif left_window_world.CurrentWindowIsMe():
@@ -926,8 +927,8 @@ class GameController:
                     training_window.windwow_controller.tap(x,y)
             else:
                 open = training_window.open()
-            if not open:
-                return False, 60*60*5
+            # if not open:
+            #     return False, 60*60*5
         CoolDownTime = training_window.GetCoolDownTime()
         training_window.ClikReturnButton()
         return True,CoolDownTime
@@ -1252,11 +1253,12 @@ class ImageJudge:
         self.threshold = config.get("threshold",0.8)
         self.save_images = config.get("save_images",True)
         if name is None:
-            self.save_path = config.get("save_path","images/tmp")
+            self.save_path = config.get("save_path",r"C:\SoftDev\wjdrbot_temp_Data\temp")
             self.label_path = config.get("label_path",None)
         else:
-            self.save_path = config.get("save_path",f"AI_Data/images/{name}")
-            self.label_path = config.get("label_path",f"AI_Data/labels/{name}")
+            root_path = r"C:\SoftDev\wjdrbot_temp_Data"
+            self.save_path = config.get("save_path",f"{root_path}/AI_Data/images/{name}")
+            self.label_path = config.get("label_path",f"{root_path}/AI_Data/labels/{name}")
 
     def Existed(self, screenshot):
 
@@ -1669,7 +1671,6 @@ class GameWindow:
                 log(f"没检测到{self.window_name}窗口打开图标，无法打开{self.window_name}窗口")
                 return False
         
-
         self.windwow_controller.tap(x,y)
         self.open_XY =(x,y)
         for i in range(Operation_interval):
@@ -1737,7 +1738,7 @@ if __name__ == "__main__":
     # print(game_controller.Task_train_shield())
     # print(game_controller.Task_train_spear())
     # print(game_controller.Task_train_bow())
-    game_controller.Task_FreeArmyQueue()
+    game_controller.Task_WarehouseRewards()
     
     # GameWindows_test = {
     #     "city":None,

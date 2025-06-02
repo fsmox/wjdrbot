@@ -9,5 +9,5 @@ region:
   right: 51
   top: 57
 swipe: null
-threshold: 0.8
+threshold: 0.9
 window_name: stamina_threshold

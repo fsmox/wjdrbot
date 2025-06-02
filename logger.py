@@ -2,6 +2,7 @@ import logging
 import sys
 from datetime import datetime
 import os
+import threading
 
 class Logger:
     _instance = None
@@ -21,7 +22,7 @@ class Logger:
         
         # 配置日志格式
         formatter = logging.Formatter(
-            '%(asctime)s [%(levelname)s] %(message)s',
+            '%(asctime)s.%(msecs)03d [%(levelname)s] %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S'
         )
         
@@ -32,12 +33,20 @@ class Logger:
         # 控制台处理器
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setFormatter(formatter)
+        console_handler.setLevel(logging.DEBUG)
         
         # 配置logger
         self.logger = logging.getLogger('App')
-        self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(logging.DEBUG)
         self.logger.addHandler(file_handler)
         self.logger.addHandler(console_handler)
+
+        # 新的日志文件，仅记录INFO及以上级别的信息
+        info_log_file = f'logs/app_info_{datetime.now().strftime("%Y%m%d")}.log'
+        info_file_handler = logging.FileHandler(info_log_file, encoding='utf-8')
+        info_file_handler.setFormatter(formatter)
+        info_file_handler.setLevel(logging.INFO)
+        self.logger.addHandler(info_file_handler)
     
     def info(self, message):
         self.logger.info(message)
@@ -56,4 +65,7 @@ logger = Logger.get_instance()
 
 def log(message):
     """便捷的日志记录函数"""
-    logger.info(message) 
+    logger.debug(f"{message}") 
+
+def Info(message):
+    logger.info(message)

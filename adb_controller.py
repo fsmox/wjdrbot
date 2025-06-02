@@ -57,8 +57,14 @@ class ADBController:
             enable_cache and 
             (capture_time - self.last_op_time > timedelta(seconds=5))):
             if capture_time - self.last_capture_time < timedelta(seconds=30):
+                log("使用上次截图")
                 return self.last_img 
-            
+        
+        log("ADB获取截图")
+        # 在模拟器中保存截图
+        # subprocess.run(['adb', 'shell', 'screencap', '-p', '/sdcard/screenshot.png'], check=True)
+        # 从模拟器中拉取截图到本地
+        # result = subprocess.run(['adb', 'pull', '/sdcard/screenshot.png', './screenshot.png'], check=True)
         result = subprocess.run(['adb', 'shell', 'screencap', '-p'], capture_output=True)
         img_bytes = result.stdout
 
@@ -71,6 +77,7 @@ class ADBController:
             return None
         # 转为图片
         image = Image.open(io.BytesIO(img_bytes))
+
         self.width,  self.height= image.size
 
         image_np = np.array(image)
@@ -80,7 +87,6 @@ class ADBController:
         self.op_after_capture = False
         self.last_img = image_bgr
         self.last_capture_time = capture_time
-        
         return image_bgr
         
     

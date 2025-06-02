@@ -23,6 +23,7 @@ class task_executor:
         self.max_fail_count = 5
         self.job_count = 0
         self.Job_id_list = []
+        self.runtime_list = []
         self.name=self.get_task_name()
         self.name = f"{self.name}_{user_id}"
         self.schedule_task_now()
@@ -41,7 +42,7 @@ class task_executor:
         """
         count_down = 5*60
         self.job_count -= 1
-        log(f"{self.name}开始执行")
+        Info(f"{self.name}开始执行")
         try:
             if self.befor is not None:
                 self.befor()
@@ -53,10 +54,10 @@ class task_executor:
                 self.after()
             self.fail_count = 0
         except Exception as e:
-            print(f"Error executing task: {e}")
+            logger.error(f"Error executing task: {e}")
             self.fail_count += 1
             if self.fail_count >= self.max_fail_count:
-                print(f"Task failed {self.fail_count} times. Stopping execution.")
+                logger.error(f"Task failed {self.fail_count} times. Stopping execution.")
                 return
             else:
                 count_down = 60 * 2 * self.fail_count  # Increase the countdown time exponentially
@@ -67,16 +68,29 @@ class task_executor:
             self.set_run_time(count_down)
         if self.job_count == 0:
             self.set_run_time(5*60)
-        log(f"{self.name}开始执行")
-        log(f"{self.name}执行结束")
+        Info(f"{self.name}执行结束")
     def set_run_time(self,run_time):
-        next_run_time = datetime.now() + timedelta(seconds=run_time)
-        print(f"{self.name} Next run time: {next_run_time}")
-        job = self.scheduler.add_job(self.execute_task, trigger='date', name=self.name,run_date=next_run_time, misfire_grace_time=3600)
-        # jod_id = job.id
-        # job_name_dic[jod_id] = self.name
-        self.job_count += 1
-        update_task_window()
+        now = datetime.now()
+        next_run_time = now + timedelta(seconds=run_time)
+        run_time_list_temp = []
+        min_space = timedelta(hours=1)
+        for run_time in self.runtime_list:
+            if run_time > now:
+                run_time_list_temp.append(run_time)
+                space = abs(next_run_time - run_time) 
+                min_space = min(min_space,space) 
+
+        if min_space < timedelta(minutes=10):
+            log(f"{self.name} skip Next run time: {next_run_time}")
+        else:
+            run_time_list_temp.append(next_run_time)
+            log(f"{self.name} Next run time: {next_run_time}")
+            job = self.scheduler.add_job(self.execute_task, trigger='date', name=self.name,run_date=next_run_time, misfire_grace_time=3600)
+            # jod_id = job.id
+            # job_name_dic[jod_id] = self.name
+            self.job_count += 1
+            update_task_window()
+        self.runtime_list = run_time_list_temp
 
     def schedule_task_now(self):
         """
