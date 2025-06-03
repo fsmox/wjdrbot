@@ -17,6 +17,7 @@ class ADBController:
     def set_op(self):
         self.last_op_time = datetime.now()
         self.op_after_capture = True
+        self.op_judge_ok = False
     
     def active(self):
         cmd = ['adb', 'shell', 'am', 'start', '--user', str(self.user_id), '-n', 'com.gof.china/com.unity3d.player.DDUnityLaunchActivity']
@@ -55,7 +56,7 @@ class ADBController:
         capture_time = datetime.now() 
         if ( not self.op_after_capture and 
             enable_cache and 
-            (capture_time - self.last_op_time > timedelta(seconds=5))):
+            ((capture_time - self.last_op_time > timedelta(seconds=5) or self.op_judge_ok))):
             if capture_time - self.last_capture_time < timedelta(seconds=30):
                 log("使用上次截图")
                 return self.last_img 

@@ -524,9 +524,12 @@ class GameController:
                     x , y = window.open_XY
                     self.windwow_controller.long_press(x , y, 5*1000)
                 if i==8:
-                    for _ in range(20):
-                        if not window.open():
-                            break
+                    Step9 =f"alliance_Step9"
+                    Step9 = self.GetWindow(Step9)
+                    if not Step9.CurrentWindowIsMe():
+                        for _ in range(20):
+                            if not window.open():
+                                break
             else:
                 if 8 <= i <= 10:
                     pass
@@ -646,7 +649,7 @@ class GameController:
                 return False
 
         now_time_hour = datetime.now().hour
-        now_time_hour = 16
+        # now_time_hour = 16
         if now_time_hour < 6:
             self.canned_collected_AM = False
             self.canned_collected_PM = False
@@ -1407,7 +1410,7 @@ class ImageJudge:
                 return False
             
             # 保存裁剪区域的图片（用于调试）
-            self.save_image(roi_bgr, 'cropped',save_path="images/tmp")
+            self.save_image(roi_bgr, 'cropped')
             
             # 读取模板图片
             template = cv2.imread(template_path)
@@ -1570,6 +1573,7 @@ class GameWindow:
         # 获取屏幕截图
         screenshot = lambda: self.windwow_controller.screenshot(enable_cache)
         existed,x,y = judge.Existed(screenshot)
+        self.windwow_controller.op_judge_ok = True
         self.judge_point = (x,y)
         return existed
 
