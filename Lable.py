@@ -403,6 +403,7 @@ def test_data():
 
     game_controller.RegisterWindow(window_name)
     test_window = game_controller.GameWindows[window_name]
+    game_controller.windwow_controller.op_after_capture = True
     test_window.open()
     
 

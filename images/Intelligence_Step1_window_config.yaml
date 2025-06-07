@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 91
+  y: 29
+method: check
+picture_path: images/Intelligence_Step1_window.png
+region:
+  bottom: 42
+  left: 67
+  right: 116
+  top: 17
+swipe: null
+threshold: 0.8
+window_name: Intelligence_Step1

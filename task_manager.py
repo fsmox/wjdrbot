@@ -195,6 +195,8 @@ if __name__ == "__main__":
             GoToCxd = None
         else:
             GoToCxd = game_controller.GoToCXD
+
+        GoToCxd = None
         exe = task_executor_new(game_controller.Task_WarehouseRewards,after=GoToCxd)
         exe_list.append(exe)
         exe = task_executor_new(game_controller.Task_Alliance)
@@ -203,14 +205,18 @@ if __name__ == "__main__":
         # exe_list.append(exe)
         exe = task_executor_new(game_controller.Task_AdventureRewards)
         exe_list.append(exe)
-        exe = task_executor_new(game_controller.Task_collection,after=GoToCxd)
-        exe_list.append(exe)
+        # exe = task_executor_new(game_controller.Task_collection,after=GoToCxd)
+        # exe_list.append(exe)
         exe = task_executor_new(game_controller.Task_Reconnect)
         exe_list.append(exe)
         exe = task_executor_new(game_controller.Task_train,after=GoToCxd)
         exe_list.append(exe)
+        exe = task_executor_new(game_controller.Task_HeroRecruit)
+        exe_list.append(exe)
         if user_id == 10:
             exe = task_executor_new(game_controller.Task_AttackIceBeast,after=GoToCxd)
+            exe_list.append(exe)
+            exe = task_executor_new(game_controller.Task_Intelligence,after=GoToCxd)
             exe_list.append(exe)
 
     try:

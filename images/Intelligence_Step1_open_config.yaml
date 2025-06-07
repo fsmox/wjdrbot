@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 466
+  y: 608
+method: find
+picture_path: images/Intelligence_Step1_open.png
+region:
+  bottom: 626
+  left: 448
+  right: 485
+  top: 590
+swipe: null
+threshold: 0.8
+window_name: Intelligence_Step1

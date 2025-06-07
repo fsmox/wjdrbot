@@ -2,12 +2,13 @@ from GlobalConfig import *
 from windows_controller import WindowsController
 from logger import log,Info,logger
 import cv2
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import threading
 import time
 import yaml
 import pytesseract
+from enum import Enum
 
 lock = threading.Lock()
 
@@ -195,6 +196,11 @@ config_alliance_window = {
     "region": region_alliance_window,
 }
 
+class TaskResult(Enum):
+    SUCCESS = 1
+    ERROR = 2
+    CONTINUE = 3
+
 class GameController:
     def __init__(self, windwow_controller:WindowsController=None):
         if windwow_controller is None:
@@ -207,6 +213,8 @@ class GameController:
         self.save_images = save_images  # 是否保存图片
         self.save_path = r"C:\SoftDev\wjdrbot_temp_Data\temp"
         self.set_game_windows()
+
+        self.HeroRecruit_faild_num = 0
 
     def set_game_windows(self):
         GameWindows_test = {
@@ -855,7 +863,140 @@ class GameController:
                 break
         
         return cool_time
+    
+    def task_sub_step_excute(self,name,step_num,Specical_error_func=None):
+        if Specical_error_func is None:
+            Specical_error_func ={}
+        for i in range(1,step_num+1):
+            window = self.GetWindow(f"{name}_Step{i}")
+            if not window.open():
+                if i in Specical_error_func:
+                    code = Specical_error_func[i](i)
+                    if code == TaskResult.ERROR:
+                        return False
+                    elif code == TaskResult.SUCCESS:
+                        return True
+                    elif code == TaskResult.CONTINUE:
+                        pass
+                    else:
+                        logger.warning(f"未定义任务错误执行code:{code}")
+                        return False
+                else:
+                    return False
+        
+        return True
 
+    def __Intelligence_sub(self,name,step_num):
+        reward_window = self.GetWindow("Intelligence_reward")
+        def reward_fun(_):
+            if reward_window.CurrentWindowIsMe():
+                x, y = reward_window.judge_point
+                self.windwow_controller.tap(x,y)
+                Info(f"成功获取{name}奖励")
+                return TaskResult.SUCCESS
+            else:
+                return TaskResult.ERROR
+        error_deal = {1:reward_fun}
+        return self.task_sub_step_excute(name,step_num,error_deal)
+    
+    def Task_Intelligence(self):
+        """
+        情报任务：自动完成情报相关操作
+        """
+        cool_time_error = 5 * 60
+
+        if self.InReconnectWindow():
+            Info("当前正在重连中")
+            return cool_time_error
+
+        world = self.GetWindow("world")
+        if not world.CurrentWindowIsMe():
+            if not self.GoToCity():
+                logger.warning("返回城市失败")
+                return cool_time_error
+            if not world.open():
+                logger.warning("野外打开失败")
+                return cool_time_error
+
+        Intelligence_item = [
+            ("Intelligence_beast",5),
+            ("Intelligence_rescue",3),
+            ("Intelligence_adventure",5),
+        ]
+        finish = True
+        for item in Intelligence_item:
+            Intelligence_window = self.GetWindow("Intelligence_Step1")
+            if not Intelligence_window.open():
+                logger.warning("情报窗口打开失败")
+                self.GoToCity()
+                world.open()
+            else:
+                name = item[0]
+                step_num = item[1]
+                if not self.__Intelligence_sub(name,step_num):
+                    if not Intelligence_window.CurrentWindowIsMe():
+                        logger.warning(f"{name}执行中出错")
+                        self.GoToCity()
+                        world.open()
+                        finish = False
+                else:
+                    finish = False
+                    time.sleep(0.5)
+        if finish:
+            Intelligence_window.ClikReturnButton()
+            cool_down = 4 * 60 *60
+        else:
+            cool_down = 2 * 60
+        return cool_down
+
+    def Task_HeroRecruit(self):
+        """
+        英雄招募任务：自动完成英雄招募相关操作
+        """
+        cool_time_error = 5 * 60
+
+        if self.InReconnectWindow():
+            Info("当前正在重连中")
+            return cool_time_error
+
+        city = self.GetWindow("city")
+        world = self.GetWindow("world")
+
+        if not city.CurrentWindowIsMe():
+            if not world.CurrentWindowIsMe():
+                if not self.GoToCity():
+                    return cool_time_error
+
+        def step3_error(step):
+            HeroRecruit_Step2 = self.GetWindow("HeroRecruit_Step2")
+            HeroRecruit_Step3 = self.GetWindow("HeroRecruit_Step3")
+            if HeroRecruit_Step2.CurrentWindowIsMe():
+                self.HeroRecruit_faild_num += 1
+                return TaskResult.CONTINUE
+            for i in range(5):
+                if HeroRecruit_Step2.CurrentWindowIsMe():
+                    self.HeroRecruit_faild_num = 0 if i != 0 else self.HeroRecruit_faild_num + 1
+                    return TaskResult.CONTINUE
+                x,y = HeroRecruit_Step2.judge_point
+                self.windwow_controller.tap(x,y)
+                time.sleep(1)
+            return TaskResult.ERROR
+                
+        error_deal = {3:step3_error}                                                                                                                                                                                                                                                               
+            
+        name = "HeroRecruit"
+        step_num = 6
+        exe_status = self.task_sub_step_excute(name,step_num,error_deal)
+        if not exe_status:
+            self.GoToCity()
+
+        if self.HeroRecruit_faild_num > 5:
+            now_time_hour = datetime.now().hour
+            cool_down = (26-now_time_hour) * 60 * 60
+        else:
+            cool_down = 5*60
+
+        return cool_down
 
     def InReconnectWindow(self):
         reconnect_window = self.GetWindow("reconcect")
@@ -1736,13 +1877,19 @@ def RegisterWindow(windows_config,window_controller=None,GameWindows=None):
 from adb_controller import ADBController
 import random
 
+
 if __name__ == "__main__":
     adb_controller = ADBController()
     game_controller = GameController(adb_controller)
     # print(game_controller.Task_train_shield())
     # print(game_controller.Task_train_spear())
     # print(game_controller.Task_train_bow())
-    game_controller.Task_WarehouseRewards()
+    
+    for i in range(20):
+        re = game_controller.Task_Intelligence()
+        if re == 4*60*60:
+            break
+        
     
     # GameWindows_test = {
     #     "city":None,
