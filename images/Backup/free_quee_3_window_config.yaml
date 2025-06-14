@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 157
+  y: 376
+method: check
+picture_path: images/free_quee_3_window.png
+region:
+  bottom: 383
+  left: 136
+  right: 178
+  top: 369
+swipe: null
+threshold: 0.5
+window_name: free_quee_3

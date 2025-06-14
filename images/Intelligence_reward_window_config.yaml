@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 253
-  y: 830
+  x: 269
+  y: 885
 method: check
 picture_path: images/Intelligence_reward_window.png
 region:
-  bottom: 840
-  left: 178
-  right: 328
-  top: 820
+  bottom: 896
+  left: 189
+  right: 350
+  top: 874
 swipe: null
 threshold: 0.8
 window_name: Intelligence_reward

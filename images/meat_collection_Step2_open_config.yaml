@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 283
-  y: 640
+  x: 301
+  y: 682
 method: find
 picture_path: images/meat_collection_Step2_open.png
 region:
-  bottom: 677
-  left: 239
-  right: 327
-  top: 603
+  bottom: 722
+  left: 255
+  right: 348
+  top: 643
 swipe: null
 threshold: 0.8
 window_name: meat_collection_Step2

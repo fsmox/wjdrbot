@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 372
-  y: 846
+  x: 397
+  y: 902
 method: check
 picture_path: images/train_Step3_window.png
 region:
-  bottom: 876
-  left: 261
-  right: 484
-  top: 817
+  bottom: 934
+  left: 278
+  right: 516
+  top: 871
 swipe: null
 threshold: 0.8
 window_name: train_Step3

@@ -1,20 +1,20 @@
 defult_click_point:
-  x: 255
-  y: 787
+  x: 271
+  y: 839
 method: ocr
 picture_path: images/warehouse_rewards_cool_down.png
 region:
-  bottom: 804
-  left: 192
-  right: 318
-  top: 770
+  bottom: 857
+  left: 204
+  right: 339
+  top: 821
 swipe:
   duration: 0.5
   end:
-    x: 162
-    y: 300
+    x: 172
+    y: 320
   start:
-    x: 160
-    y: 540
+    x: 170
+    y: 576
 threshold: 0.8
 window_name: warehouse_rewards_cool_down

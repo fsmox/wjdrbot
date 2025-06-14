@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 109
+  y: 174
+method: check
+picture_path: images/Alliance_mobilization_Step2_window.png
+region:
+  bottom: 192
+  left: 27
+  right: 191
+  top: 156
+swipe: null
+threshold: 0.8
+window_name: Alliance_mobilization_Step2

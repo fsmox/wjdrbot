@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 253
+  y: 852
+method: check
+picture_path: images/collection_Step3_open.png
+region:
+  bottom: 880
+  left: 143
+  right: 363
+  top: 825
+swipe: null
+threshold: 0.8
+window_name: collection_Step3

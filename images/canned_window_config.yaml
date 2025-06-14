@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 253
-  y: 671
+  x: 270
+  y: 716
 method: check
 picture_path: images/canned_window.png
 region:
-  bottom: 701
-  left: 156
-  right: 350
-  top: 641
+  bottom: 748
+  left: 166
+  right: 374
+  top: 684
 swipe: null
 threshold: 0.8
 window_name: canned

@@ -16,187 +16,188 @@ lock = threading.Lock()
 
 config_base_high = 900
 config_base_width = 506
-
-config_reconnect ={
-    "picture_path": "images/reconnect.png",
-    "threshold":0.8,
-}
-config_popup = {
-    "picture_path": "images/close_popup.png",
-    "threshold": 0.8,
-}
-left = 430
-top = 820
-width = 56
-height = 76
-region_city = {
-          "left": 430 , # 左边界X坐标
-          "top": 820 , # 上边界Y坐标
-          "right": 430+56 ,# 右边界X坐标
-          "bottom": 820+70 ,# 下边界Y坐标 
-            }
-
-config_city = {
-    "picture_path": "images/city.png",
-    "region": region_city,
-    "threshold": 0.8,
+if Create_new_config:
+    config_reconnect ={
+        "picture_path": "images/reconnect.png",
+        "threshold":0.8,
     }
-
-left = 430
-top = 820
-width = 56
-height = 76
-region_world = {
-        "left": 430, # 左边界X坐标
-        "top": 820, # 上边界Y坐标
-        "right": 430+56,# 右边界X坐标
-        "bottom": 820+76,# 下边界Y坐标 
+    config_popup = {
+        "picture_path": "images/close_popup.png",
+        "threshold": 0.8,
+    }
+    left = 430
+    top = 820
+    width = 56
+    height = 76
+    region_city = {
+            "left": 430 , # 左边界X坐标
+            "top": 820 , # 上边界Y坐标
+            "right": 430+56 ,# 右边界X坐标
+            "bottom": 820+70 ,# 下边界Y坐标 
                 }
-config_world = {
-    "picture_path": "images/world.png",
-    "region": region_world,
-    "threshold": 0.8,
+
+    config_city = {
+        "picture_path": "images/city.png",
+        "region": region_city,
+        "threshold": 0.8,
+        }
+
+    left = 430
+    top = 820
+    width = 56
+    height = 76
+    region_world = {
+            "left": 430, # 左边界X坐标
+            "top": 820, # 上边界Y坐标
+            "right": 430+56,# 右边界X坐标
+            "bottom": 820+76,# 下边界Y坐标 
+                    }
+    config_world = {
+        "picture_path": "images/world.png",
+        "region": region_world,
+        "threshold": 0.8,
+        }
+    left = 446
+    top = 92
+    width = 46
+    height = 46
+    region_RutineTask = {
+            "left": 446 , # 左边界X坐标
+            "top": top , # 上边界Y坐标
+            "right": left+width ,# 右边界X坐标
+            "bottom": top+height ,# 下边界Y坐标 
+                }
+    config_RoutineTask = {
+        "defult_location": {
+            "x": left+width//2,
+            "y": top+height//2, 
+        },
+        "picture_path": "images/routine_task.png",
+        "threshold": 0.8,
     }
-left = 446
-top = 92
-width = 46
-height = 46
-region_RutineTask = {
-          "left": 446 , # 左边界X坐标
-          "top": top , # 上边界Y坐标
-          "right": left+width ,# 右边界X坐标
-          "bottom": top+height ,# 下边界Y坐标 
-            }
-config_RoutineTask = {
-    "defult_location": {
-        "x": left+width//2,
-        "y": top+height//2, 
-    },
-    "picture_path": "images/routine_task.png",
-    "threshold": 0.8,
-}
 
-file_name = "routine_task_return"
-with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
-    region_RutineTask_return = yaml.safe_load(f)
-config_RutineTask_return = {
-    "defult_location": {    
-        "x": region_RutineTask_return["defult_location"]["x"],
-        "y": region_RutineTask_return["defult_location"]["y"], 
-    }, 
-    "picture_path": f"images/{file_name}.png",
-    "threshold": 0.8,
-    "region": region_RutineTask_return,
-}
+    file_name = "routine_task_return"
+    with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
+        region_RutineTask_return = yaml.safe_load(f)
+    config_RutineTask_return = {
+        "defult_location": {    
+            "x": region_RutineTask_return["defult_location"]["x"],
+            "y": region_RutineTask_return["defult_location"]["y"], 
+        }, 
+        "picture_path": f"images/{file_name}.png",
+        "threshold": 0.8,
+        "region": region_RutineTask_return,
+    }
 
-file_name = "alliance_mobilization"
-with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
-    region_alliance_mobilization = yaml.safe_load(f)
-config_alliance_mobilization = {
-    "defult_location": {    
-        "x": region_alliance_mobilization["defult_location"]["x"],
-        "y": region_alliance_mobilization["defult_location"]["y"], 
-    }, 
-    "picture_path": f"images/{file_name}.png",
-    "threshold": 0.7,
-    "region": region_alliance_mobilization,
-}
+    file_name = "alliance_mobilization"
+    with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
+        region_alliance_mobilization = yaml.safe_load(f)
+    config_alliance_mobilization = {
+        "defult_location": {    
+            "x": region_alliance_mobilization["defult_location"]["x"],
+            "y": region_alliance_mobilization["defult_location"]["y"], 
+        }, 
+        "picture_path": f"images/{file_name}.png",
+        "threshold": 0.7,
+        "region": region_alliance_mobilization,
+    }
 
-file_name = "alliance_mobilization_window"
-with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
-    region_alliance_mobilization_window = yaml.safe_load(f)
-config_alliance_mobilization_window = {
-    "defult_location": {    
-        "x": region_alliance_mobilization_window["defult_location"]["x"],
-        "y": region_alliance_mobilization_window["defult_location"]["y"], 
-    }, 
-    "picture_path": f"images/{file_name}.png",
-    "threshold": 0.7,
-    "region": region_alliance_mobilization_window,
-}
+    file_name = "alliance_mobilization_window"
+    with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
+        region_alliance_mobilization_window = yaml.safe_load(f)
+    config_alliance_mobilization_window = {
+        "defult_location": {    
+            "x": region_alliance_mobilization_window["defult_location"]["x"],
+            "y": region_alliance_mobilization_window["defult_location"]["y"], 
+        }, 
+        "picture_path": f"images/{file_name}.png",
+        "threshold": 0.7,
+        "region": region_alliance_mobilization_window,
+    }
 
-file_name = "Zdy_left"
-with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
-    region_Zdy_left = yaml.safe_load(f)
-config_Zdy_left = {
-    "defult_location": {    
-        "x": region_Zdy_left["defult_location"]["x"],
-        "y": region_Zdy_left["defult_location"]["y"], 
-    }, 
-    "picture_path": f"images/{file_name}.png",
-    "threshold": 0.6,
-    "region": region_Zdy_left,
-}
-file_name = "Zdy_right"
-with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
-    region_Zdy_right = yaml.safe_load(f)
-config_Zdy_right = {
-    "defult_location": {    
-        "x": region_Zdy_right["defult_location"]["x"],
-        "y": region_Zdy_right["defult_location"]["y"], 
-    }, 
-    "picture_path": f"images/{file_name}.png",
-    "threshold": 0.6,
-    "region": region_Zdy_right,
-}
+    file_name = "Zdy_left"
+    with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
+        region_Zdy_left = yaml.safe_load(f)
+    config_Zdy_left = {
+        "defult_location": {    
+            "x": region_Zdy_left["defult_location"]["x"],
+            "y": region_Zdy_left["defult_location"]["y"], 
+        }, 
+        "picture_path": f"images/{file_name}.png",
+        "threshold": 0.6,
+        "region": region_Zdy_left,
+    }
+    file_name = "Zdy_right"
+    with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
+        region_Zdy_right = yaml.safe_load(f)
+    config_Zdy_right = {
+        "defult_location": {    
+            "x": region_Zdy_right["defult_location"]["x"],
+            "y": region_Zdy_right["defult_location"]["y"], 
+        }, 
+        "picture_path": f"images/{file_name}.png",
+        "threshold": 0.6,
+        "region": region_Zdy_right,
+    }
 
-file_name = "refresh_task_button"
-with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
-    region_refresh_task_button = yaml.safe_load(f)
+    file_name = "refresh_task_button"
+    with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
+        region_refresh_task_button = yaml.safe_load(f)
 
-config_refresh_task_button = {
-    "defult_location": {    
-        "x": region_refresh_task_button["defult_location"]["x"],
-        "y": region_refresh_task_button["defult_location"]["y"], 
-        "close_x": region_refresh_task_button["defult_location"]["x"],
-        "close_y": region_refresh_task_button["defult_location"]["y"] + 100,
-        "double_confirm_x": 356,
-        "double_confirm_y": region_refresh_task_button["defult_location"]["y"],
-    }, 
-    "picture_path": f"images/{file_name}.png",
-    "threshold": 0.8,
-    "region": region_refresh_task_button,
-}
+    config_refresh_task_button = {
+        "defult_location": {    
+            "x": region_refresh_task_button["defult_location"]["x"],
+            "y": region_refresh_task_button["defult_location"]["y"], 
+            "close_x": region_refresh_task_button["defult_location"]["x"],
+            "close_y": region_refresh_task_button["defult_location"]["y"] + 100,
+            "double_confirm_x": 356,
+            "double_confirm_y": region_refresh_task_button["defult_location"]["y"],
+        }, 
+        "picture_path": f"images/{file_name}.png",
+        "threshold": 0.8,
+        "region": region_refresh_task_button,
+    }
 
-file_name = "return_button"
-with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
-    region_return_button = yaml.safe_load(f)
-config_return_button = {
-    "defult_location": {    
-        "x": region_return_button["defult_click_point"]["x"],
-        "y": region_return_button["defult_click_point"]["y"], 
-    }, 
-    "picture_path": f"images/{file_name}.png",
-    "threshold": 0.8,
-    "region": region_return_button["region"],
-}
+    file_name = "return_button"
+    with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
+        region_return_button = yaml.safe_load(f)
+    config_return_button = {
+        "defult_location": {    
+            "x": region_return_button["defult_click_point"]["x"],
+            "y": region_return_button["defult_click_point"]["y"], 
+        }, 
+        "picture_path": f"images/{file_name}.png",
+        "threshold": 0.8,
+        "region": region_return_button["region"],
+    }
 
 
-file_name = "alliance_icon"
-with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
-    region_alliance_icon = yaml.safe_load(f)
-config_alliance_icon = {
-    "defult_location": {    
-        "x": region_alliance_icon["defult_location"]["x"],
-        "y": region_alliance_icon["defult_location"]["y"], 
-    }, 
-    "picture_path": f"images/{file_name}.png",
-    "threshold": 0.8,
-    "region": region_alliance_icon,
-}
+    file_name = "alliance_icon"
+    with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
+        region_alliance_icon = yaml.safe_load(f)
+    config_alliance_icon = {
+        "defult_location": {    
+            "x": region_alliance_icon["defult_location"]["x"],
+            "y": region_alliance_icon["defult_location"]["y"], 
+        }, 
+        "picture_path": f"images/{file_name}.png",
+        "threshold": 0.8,
+        "region": region_alliance_icon,
+    }
 
-file_name = "alliance_window"
-with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
-    region_alliance_window = yaml.safe_load(f)
-config_alliance_window = {
-    "defult_location": {    
-        "x": region_alliance_window["defult_location"]["x"],
-        "y": region_alliance_window["defult_location"]["y"], 
-    }, 
-    "picture_path": f"images/{file_name}.png",
-    "threshold": 0.65,
-    "region": region_alliance_window,
-}
+    file_name = "alliance_window"
+    with open(f'images/{file_name}_config.yaml', 'r', encoding='utf-8') as f:
+        region_alliance_window = yaml.safe_load(f)
+    config_alliance_window = {
+        "defult_location": {    
+            "x": region_alliance_window["defult_location"]["x"],
+            "y": region_alliance_window["defult_location"]["y"], 
+        }, 
+        "picture_path": f"images/{file_name}.png",
+        "threshold": 0.65,
+        "region": region_alliance_window,
+    }
+
 
 class TaskResult(Enum):
     SUCCESS = 1
@@ -388,15 +389,60 @@ class GameController:
     def RefreshAllianceMobilization_left(self, task_name=None):
         return self.RefreshAllianceMobilization(config_Zdy_left, task_name=task_name)
 
-    def Task_RefreshAllianceMobilization(self):
-        self.ReturnToCity()
-        self.OpenRoutineTask()
-        self.OpenAlliance_mobilization()
-        self.RefreshAllianceMobilization_left()
-        self.RefreshAllianceMobilization_right()
-        self.CloseRoutineTask()
+    def __RefreshAllianceMobilizationTask(self,side):
+        defult_cool_down = 5*60
+        task_is_cooling = self.GetWindow(f"IsCooldown_{side}")
+        task_refresh = self.GetWindow(f"Refresh_Mobilization_{side}")
+        if not task_is_cooling.CurrentWindowIsMe():
+            if not task_refresh.open():
+                logger.warning("打开联盟任务刷新窗口失败")
+                return defult_cool_down
+        else:
+            Info("联盟任务正在冷却中")
+            return defult_cool_down
+        Train_task = self.GetWindow("Train_task")
+        AllianceMobilization_task_close = self.GetWindow("AllianceMobilization_task_close")
+        if Train_task.CurrentWindowIsMe():
+            Score = self.__GetAlliaceTaskScore(Train_task.windwow_controller.screenshot())
+            if Score == 520 or Score == 860:
+                Info(f"刷新大拳头成功，分数:{Score}")
+                AllianceMobilization_task_close.open()
+                return 60 * 60
+        
 
-        return 2*60    
+        window = self.GetWindow("Refresh_Mobilization_Task_Step1")
+        if not window.open():
+            Info("任务正在进行中")
+            AllianceMobilization_task_close.open()
+            return defult_cool_down
+        
+        window = self.GetWindow("Refresh_Mobilization_Task_Step2")
+        if not window.open():
+            logger.warning("联盟任务刷新窗口点击失败")
+            AllianceMobilization_task_close.open()
+            self.GoToCity()
+
+        cool_down = task_is_cooling.GetCoolDownTime( defult_cool_down )
+
+        return cool_down
+
+
+    def Task_RefreshAllianceMobilization(self):
+        self.GoToCity()
+        for i in range(1,3):
+            window=self.GetWindow(f"Alliance_mobilization_Step{i}")
+            if not window.open():
+                self.GoToCity()
+
+        down_list = []
+        t = self.__RefreshAllianceMobilizationTask("left")
+        self.__add_cool_dow_time_to_cool_down_list(down_list,t )
+        t = self.__RefreshAllianceMobilizationTask("right")
+        self.__add_cool_dow_time_to_cool_down_list(down_list,t )
+        window.ClikReturnButton()
+        
+
+        return down_list  
     def __RefreshTaskButtonExsited(self, task_name=None):
         exsited = self.check_image(config_refresh_task_button["picture_path"], config_refresh_task_button["region"], config_refresh_task_button["threshold"], notify=True, task_name=task_name, real_time_show=False)
         return exsited
@@ -408,12 +454,9 @@ class GameController:
         return not exsited
 
     def __GetAlliaceTaskScore(self,img, task_name=None):
-        OCR_region = {
-            "left": 68 , # 左边界X坐标
-            "top": 140 , # 上边界Y坐标
-            "right": 125 ,# 右边界X坐标
-            "bottom": 160 ,# 下边界Y坐标 
-                }
+        train_task = self.GetWindow("Train_task")
+        ocr_config = train_task.cool_down_config
+        OCR_region = ocr_config["region"]
         try:
             OCR_img = img[OCR_region['top']:OCR_region['bottom'], OCR_region['left']:OCR_region['right']]
             # 转换为灰度图
@@ -458,14 +501,20 @@ class GameController:
 
     def Task_Alliance(self):
         cool_time_error = 5*60
-        for i in range(1,14):
+        for i in range(1,19):
             name = f"alliance_Step{i}"
             window = self.GetWindow(name)
+            if i==8:
+                alliance_Step8_0 = self.GetWindow("alliance_Step8_0")
+                alliance_Step8_0.open()
             if window.open():
-                if i == 4:
+                if i== 2:
+                    time.sleep(0.5)
+                    window.windwow_controller.op_after_capture = True
+                elif i == 4:
                     x , y = window.open_XY
                     self.windwow_controller.long_press(x , y, 5*1000)
-                if i==8:
+                elif i==8:
                     Step9 =f"alliance_Step9"
                     Step9 = self.GetWindow(Step9)
                     if not Step9.CurrentWindowIsMe():
@@ -491,10 +540,10 @@ class GameController:
         """领取探险奖励"""
 
         click_point_list = [
-            {"x": 44, "y": 848},
-            {"x": 428, "y": 640},
-            {"x": 240, "y": 640},
-            {"x": 240, "y": 640},
+            {"x": 47, "y": 904},
+            {"x": 457, "y": 683},
+            {"x": 256, "y": 683},
+            {"x": 256, "y": 683},
         ]
 
         GameWindows = self.GameWindows
@@ -572,7 +621,6 @@ class GameController:
                 return False
 
         now_time_hour = datetime.now().hour
-        # now_time_hour = 16
         if now_time_hour < 6:
             self.canned_collected_AM = False
             self.canned_collected_PM = False
@@ -759,29 +807,7 @@ class GameController:
         self.GoToCity()
         if not self.__OpenLeftWinow_World():
             return 60 * 5
-    def Task_canned(self):
-        cool_time_error = 5*60
 
-        if not self.GoToCity():
-            return cool_time_error
-        
-        # 定义窗口序列
-        window_sequence = [
-            "left_window",
-            "left_window_city",
-            "Technology_reserach_center",
-            "warehouse",
-            "canned"
-        ]
-        cool_time = []
-        for window_name in window_sequence:
-            window = self.GetWindow(window_name)
-            if not window.open():
-                cool_time = cool_time_error
-                self.GoToCity()
-                break
-        
-        return cool_time
     
     def task_sub_step_excute(self,name,step_num,Specical_error_func=None):
         if Specical_error_func is None:
@@ -863,7 +889,7 @@ class GameController:
                     time.sleep(0.5)
         if finish:
             Intelligence_window.ClikReturnButton()
-            cool_down = 4 * 60 *60
+            cool_down = 2 * 60 *60
         else:
             cool_down = 2 * 60
         return cool_down
@@ -1321,8 +1347,8 @@ if __name__ == "__main__":
     # print(game_controller.Task_train_shield())
     # print(game_controller.Task_train_spear())
     # print(game_controller.Task_train_bow())
-    game_controller.GoToCity()
-    game_controller.Task_WarehouseRewards()
+    # game_controller.GoToCity()
+    game_controller.Task_collection()
     # for i in range(20):
     #     re = game_controller.Task_Intelligence()
     #     if re == 4*60*60:

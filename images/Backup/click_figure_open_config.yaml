@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 397
+  y: 537
+method: find
+picture_path: images/click_figure_open.png
+region:
+  bottom: 548
+  left: 382
+  right: 412
+  top: 527
+swipe: null
+threshold: 0.5
+window_name: click_figure

@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 133
+  y: 593
+method: find
+picture_path: images/HeroRecruit_Step3_open.png
+region:
+  bottom: 619
+  left: 38
+  right: 228
+  top: 568
+swipe: null
+threshold: 0.8
+window_name: HeroRecruit_Step3

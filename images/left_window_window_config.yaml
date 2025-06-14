@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 326
-  y: 387
+  x: 348
+  y: 412
 method: check
 picture_path: images/left_window_window.png
 region:
-  bottom: 401
-  left: 319
-  right: 334
-  top: 374
+  bottom: 427
+  left: 340
+  right: 356
+  top: 398
 swipe: null
 threshold: 0.8
 window_name: left_window

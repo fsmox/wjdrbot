@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 220
+  y: 693
+method: find
+picture_path: images/alliance_Step3_open.png
+region:
+  bottom: 706
+  left: 204
+  right: 236
+  top: 681
+swipe: null
+threshold: 0.8
+window_name: alliance_Step3

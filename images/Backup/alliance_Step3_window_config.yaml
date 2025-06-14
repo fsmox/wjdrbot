@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 358
+  y: 711
+method: check
+picture_path: images/alliance_Step3_window.png
+region:
+  bottom: 723
+  left: 338
+  right: 379
+  top: 700
+swipe: null
+threshold: 0.8
+window_name: alliance_Step3

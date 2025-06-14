@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 270
+  y: 319
+method: check
+picture_path: images/Refresh_Mobilization_right_window.png
+region:
+  bottom: 331
+  left: 225
+  right: 316
+  top: 308
+swipe: null
+threshold: 0.8
+window_name: Refresh_Mobilization_right

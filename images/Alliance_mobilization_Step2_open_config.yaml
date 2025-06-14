@@ -1,0 +1,20 @@
+defult_click_point:
+  x: 120
+  y: 95
+method: swipe_find
+picture_path: images/Alliance_mobilization_Step2_open.png
+region:
+  bottom: 112
+  left: 100
+  right: 141
+  top: 79
+swipe:
+  duration: 1070.0
+  end:
+    x: 353
+    y: 112
+  start:
+    x: 177
+    y: 109
+threshold: 0.8
+window_name: Alliance_mobilization_Step2

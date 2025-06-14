@@ -51,13 +51,15 @@ class ADBController:
         subprocess.run(['adb', 'shell', 'input', 'tap', str(x), str(y)])
         self.set_op()
     
-    def screenshot(self,enable_cache = True):
+    def screenshot(self,enable_cache = True, container=None):
         # 获取原始截图字节
         capture_time = datetime.now() 
         if ( not self.op_after_capture and 
             enable_cache and 
             ((capture_time - self.last_op_time > timedelta(seconds=5) or self.op_judge_ok))):
             if capture_time - self.last_capture_time < timedelta(seconds=30):
+                if container is not None:
+                    container[0] = self.capture_original
                 log("使用上次截图")
                 return self.last_img 
         
@@ -82,13 +84,21 @@ class ADBController:
         self.width,  self.height= image.size
 
         image_np = np.array(image)
-        img_resized = cv2.resize(image_np, (Capture_width, Capture_height))
         # 将图片转换为BGR模式
-        image_bgr = cv2.cvtColor(img_resized, cv2.COLOR_RGBA2RGB)
+        image_bgr = cv2.cvtColor(image_np, cv2.COLOR_RGBA2RGB)
+        self.capture_original = image_bgr
+        if container is not None:
+            container[0] = self.capture_original
+        if original_size:
+            img_resized = image_bgr
+        else:
+            img_resized = cv2.resize(image_bgr, (Capture_width, Capture_height))
+        
         self.op_after_capture = False
-        self.last_img = image_bgr
+        self.last_img = img_resized
+
         self.last_capture_time = capture_time
-        return image_bgr
+        return img_resized
         
     
     def get_current_app(self):

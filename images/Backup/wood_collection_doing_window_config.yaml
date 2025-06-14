@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 32
+  y: 469
+method: find
+picture_path: images/wood_collection_doing_window.png
+region:
+  bottom: 479
+  left: 21
+  right: 43
+  top: 459
+swipe: null
+threshold: 0.8
+window_name: wood_collection_doing

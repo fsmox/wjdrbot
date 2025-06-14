@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 300
-  y: 225
+  x: 320
+  y: 240
 method: check
 picture_path: images/collection_Step5_open.png
 region:
-  bottom: 242
-  left: 285
-  right: 315
-  top: 209
+  bottom: 258
+  left: 304
+  right: 336
+  top: 222
 swipe: null
-threshold: 0.8
+threshold: 0.4
 window_name: collection_Step5

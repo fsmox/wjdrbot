@@ -161,6 +161,7 @@ if __name__ == "__main__":
     from GameController import *
     import tkinter as tk
     from tkinter import ttk
+    
 
     
     root = tk.Tk()
@@ -201,23 +202,25 @@ if __name__ == "__main__":
         exe_list.append(exe)
         exe = task_executor_new(game_controller.Task_Alliance)
         exe_list.append(exe)
-        # exe = task_executor(scheduler,game_controller.Task_RefreshAllianceMobilization,GoToCXD=GoToCxd)
-        # exe_list.append(exe)
+       
         exe = task_executor_new(game_controller.Task_AdventureRewards)
         exe_list.append(exe)
-        # exe = task_executor_new(game_controller.Task_collection,after=GoToCxd)
-        # exe_list.append(exe)
+        exe = task_executor_new(game_controller.Task_collection,after=GoToCxd)
+        exe_list.append(exe)
         exe = task_executor_new(game_controller.Task_Reconnect)
         exe_list.append(exe)
         exe = task_executor_new(game_controller.Task_train,after=GoToCxd)
         exe_list.append(exe)
         exe = task_executor_new(game_controller.Task_HeroRecruit)
         exe_list.append(exe)
+        exe = task_executor_new(game_controller.Task_RefreshAllianceMobilization)
+        exe_list.append(exe)
         if user_id == 10:
             exe = task_executor_new(game_controller.Task_AttackIceBeast,after=GoToCxd)
             exe_list.append(exe)
             exe = task_executor_new(game_controller.Task_Intelligence,after=GoToCxd)
             exe_list.append(exe)
+            
 
     try:
         print("Scheduler started. Press Ctrl+C to exit.")

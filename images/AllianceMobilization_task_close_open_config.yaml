@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 499
+  y: 319
+method: None
+picture_path: images/AllianceMobilization_task_close_open.png
+region:
+  bottom: 330
+  left: 489
+  right: 510
+  top: 309
+swipe: null
+threshold: 0.8
+window_name: AllianceMobilization_task_close

@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 31
-  y: 262
+  x: 32
+  y: 279
 method: find
 picture_path: images/meat_collection_doing_window.png
 region:
-  bottom: 273
-  left: 19
-  right: 43
-  top: 252
+  bottom: 290
+  left: 20
+  right: 45
+  top: 268
 swipe: null
 threshold: 0.8
 window_name: meat_collection_doing

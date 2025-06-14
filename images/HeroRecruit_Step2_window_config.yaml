@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 455
-  y: 78
+  x: 485
+  y: 83
 method: check
 picture_path: images/HeroRecruit_Step2_window.png
 region:
-  bottom: 95
-  left: 421
-  right: 490
-  top: 61
+  bottom: 101
+  left: 449
+  right: 522
+  top: 65
 swipe: null
 threshold: 0.8
 window_name: HeroRecruit_Step2

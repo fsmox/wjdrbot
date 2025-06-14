@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 167
+  y: 518
+method: ocr
+picture_path: images/IsCooldown_left_cool_down.png
+region:
+  bottom: 532
+  left: 125
+  right: 209
+  top: 504
+swipe: null
+threshold: 0.8
+window_name: IsCooldown_left

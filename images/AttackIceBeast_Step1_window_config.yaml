@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 173
-  y: 641
+  x: 184
+  y: 683
 method: None
 picture_path: images/AttackIceBeast_Step1_window.png
 region:
-  bottom: 685
-  left: 119
-  right: 227
-  top: 597
+  bottom: 730
+  left: 126
+  right: 242
+  top: 636
 swipe: null
 threshold: 0.8
 window_name: AttackIceBeast_Step1

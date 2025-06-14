@@ -1,12 +1,12 @@
 defult_click_point:
-  x: 30
-  y: 26
+  x: 31
+  y: 28
 method: None
 picture_path: images/alliance_Step6_open.png
 region:
-  bottom: 45
+  bottom: 48
   left: 8
-  right: 52
+  right: 55
   top: 8
 swipe: null
 threshold: 0.8

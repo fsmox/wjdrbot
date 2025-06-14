@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 368
+  y: 428
+method: check
+picture_path: images/Technology_reserach_center_window.png
+region:
+  bottom: 458
+  left: 353
+  right: 384
+  top: 399
+swipe: null
+threshold: 0.8
+window_name: Technology_reserach_center

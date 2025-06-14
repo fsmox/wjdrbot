@@ -1,5 +1,5 @@
 from GlobalConfig import *
-from windows_controller import WindowsController
+from adb_controller import ADBController
 from logger import log,Info,logger
 import os
 import threading
@@ -9,7 +9,7 @@ from ImageJudge import ImageJudge
 
 
 class GameWindow:
-    def __init__(self,window_name,open_config,in_window_config,cool_down_config, windwow_controller: WindowsController):
+    def __init__(self,window_name,open_config,in_window_config,cool_down_config, windwow_controller: ADBController):
         self.windwow_controller = windwow_controller
         self.window_name = window_name
         self.father_window = None
@@ -70,14 +70,15 @@ class GameWindow:
         if self.cool_down_config is None:
             return default_cool_down_time # 默认冷却时间为10分钟
         # 获取屏幕截图
-        screen = self.windwow_controller.screenshot(enable_cache=False)
+        container = [None]
+        screen = self.windwow_controller.screenshot(enable_cache=False,container=container)
         # 检查屏幕截图是否有效
         if screen is None or screen.size == 0:
             log("获取屏幕截图失败")
             return default_cool_down_time # 默认冷却时间为10分钟
         
         judge = ImageJudge(self.cool_down_config)
-        total_seconds = judge.get_countdown_time(screen)
+        total_seconds = judge.get_countdown_time(screen,original_screen=container[0])
 
         return total_seconds if total_seconds is not None else default_cool_down_time
         # 获取冷却时间的逻辑
@@ -155,7 +156,7 @@ def RegisterWindow(windows_config,window_controller=None,GameWindows=None):
         GameWindows = {}
 
     if window_controller is None:
-        window_controller = WindowsController()
+        window_controller = ADBController()
     for window_name,config in windows_config.items():
         in_window_config = f"images/{window_name}_window_config.yaml"
         open_config = f"images/{window_name}_open_config.yaml"

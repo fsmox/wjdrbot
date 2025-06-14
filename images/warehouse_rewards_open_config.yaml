@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 253
-  y: 381
+  x: 269
+  y: 406
 method: None
 picture_path: images/warehouse_rewards_open.png
 region:
-  bottom: 418
-  left: 222
-  right: 284
-  top: 345
+  bottom: 445
+  left: 236
+  right: 303
+  top: 368
 swipe: null
 threshold: 0.8
 window_name: warehouse_rewards

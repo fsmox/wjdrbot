@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 370
-  y: 843
+  x: 395
+  y: 899
 method: None
 picture_path: images/Intelligence_adventure_Step4_open.png
 region:
-  bottom: 871
-  left: 259
-  right: 482
-  top: 815
+  bottom: 929
+  left: 276
+  right: 514
+  top: 869
 swipe: null
 threshold: 0.8
 window_name: Intelligence_adventure_Step4

@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 390
+  y: 593
+method: check
+picture_path: images/IsCooldown_right_window.png
+region:
+  bottom: 619
+  left: 289
+  right: 491
+  top: 567
+swipe: null
+threshold: 0.8
+window_name: IsCooldown_right

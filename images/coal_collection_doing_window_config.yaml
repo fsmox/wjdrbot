@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 32
-  y: 520
+  x: 34
+  y: 390
 method: find
 picture_path: images/coal_collection_doing_window.png
 region:
-  bottom: 533
-  left: 18
-  right: 46
-  top: 507
+  bottom: 404
+  left: 19
+  right: 49
+  top: 376
 swipe: null
 threshold: 0.8
 window_name: coal_collection_doing

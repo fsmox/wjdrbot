@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 458
+  y: 855
+method: check
+picture_path: images/city_open.png
+region:
+  bottom: 890
+  left: 430
+  right: 486
+  top: 820
+swipe: null
+threshold: 0.8
+window_name: city

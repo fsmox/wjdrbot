@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 366
-  y: 562
+  x: 390
+  y: 599
 method: None
 picture_path: images/reconcect_open.png
 region:
-  bottom: 594
-  left: 257
-  right: 475
-  top: 531
+  bottom: 633
+  left: 274
+  right: 506
+  top: 566
 swipe: null
 threshold: 0.8
 window_name: reconcect

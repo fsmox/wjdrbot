@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 386
+  y: 852
+method: check
+picture_path: images/AttackIceBeast_Step4_window.png
+region:
+  bottom: 880
+  left: 284
+  right: 488
+  top: 824
+swipe: null
+threshold: 0.8
+window_name: AttackIceBeast_Step4

@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 86
-  y: 341
+  x: 91
+  y: 363
 method: find
 picture_path: images/Intelligence_beast_Step4_window.png
 region:
-  bottom: 355
-  left: 76
-  right: 96
-  top: 328
+  bottom: 377
+  left: 81
+  right: 102
+  top: 349
 swipe: null
 threshold: 0.8
 window_name: Intelligence_beast_Step4

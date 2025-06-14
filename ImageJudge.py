@@ -45,14 +45,18 @@ class ImageJudge:
                 log("获取屏幕截图失败")
                 return False, center_x, center_y
             if self.method == "check" or self.method == "swipe_check":
-                # existed = self.check_image(screen)
-                region = self.region
-                top = max(region['top'] - 10,0)
-                bottom = min(region['bottom']+10,Capture_height)
-                left = max(region['left']-10,0)
-                right = min(region['right']+10,Capture_width)
-                cropped_img = screen[top:bottom, left:right]
-                existed, center_x, center_y = self.find_image_in_image(cropped_img)
+                if Create_new_config:
+
+                    region = self.region
+                    top = max(region['top'] - 10,0)
+                    bottom = min(region['bottom']+10,Capture_height)
+                    left = max(region['left']-10,0)
+                    right = min(region['right']+10,Capture_width)
+                    cropped_img = screen[top:bottom, left:right]
+                    existed, center_x, center_y = self.find_image_in_image(cropped_img)
+                else:
+                    existed = self.check_image(screen)
+
                 center_x = (self.region['left'] + self.region['right']) // 2
                 center_y = (self.region['top'] + self.region['bottom']) // 2
             elif self.method == "find" or self.method == "swipe_find":
@@ -70,7 +74,7 @@ class ImageJudge:
 
         return existed, center_x, center_y
     
-    def get_countdown_time(self,screen, region=None):
+    def get_countdown_time(self,screen,original_screen=None,region=None):
         """识别屏幕上的倒计时时间，支持多种格式"""
         try:
             if region is None:
@@ -139,6 +143,7 @@ class ImageJudge:
             if hours >= 0 and minutes >= 0 and minutes < 60 and seconds >= 0 and seconds < 60:
                 total_seconds = hours * 3600 + minutes * 60 + seconds
                 log(f"解析倒计时: {hours}时{minutes}分{seconds}秒，共{total_seconds}秒")
+                self.ChangeFormat(region,self.config,original_screen)
                 return total_seconds
             else:
                 log(f"时间值超出范围: {hours}:{minutes}:{seconds}")

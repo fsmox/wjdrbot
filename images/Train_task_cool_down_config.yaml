@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 298
+  y: 562
+method: ocr
+picture_path: images/Train_task_cool_down.png
+region:
+  bottom: 573
+  left: 273
+  right: 324
+  top: 551
+swipe: null
+threshold: 0.8
+window_name: Train_task

@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 253
-  y: 851
+  x: 269
+  y: 907
 method: None
 picture_path: images/alliance_Step10_open.png
 region:
-  bottom: 864
-  left: 204
-  right: 302
-  top: 838
+  bottom: 921
+  left: 217
+  right: 322
+  top: 893
 swipe: null
 threshold: 0.8
 window_name: alliance_Step10

@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 376
+  y: 820
+method: None
+picture_path: images/alliance_Step15_open.png
+region:
+  bottom: 854
+  left: 250
+  right: 503
+  top: 787
+swipe: null
+threshold: 0.8
+window_name: alliance_Step15

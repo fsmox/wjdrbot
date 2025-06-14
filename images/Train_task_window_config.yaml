@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 103
+  y: 427
+method: check
+picture_path: images/Train_task_window.png
+region:
+  bottom: 462
+  left: 69
+  right: 137
+  top: 393
+swipe: null
+threshold: 0.8
+window_name: Train_task

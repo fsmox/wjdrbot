@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 390
+  y: 541
+method: None
+picture_path: images/Refresh_Mobilization_right_open.png
+region:
+  bottom: 629
+  left: 283
+  right: 497
+  top: 453
+swipe: null
+threshold: 0.8
+window_name: Refresh_Mobilization_right

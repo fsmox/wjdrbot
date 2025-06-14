@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 157
+  y: 426
+method: ocr
+picture_path: images/free_quee_4_cool_down.png
+region:
+  bottom: 437
+  left: 128
+  right: 187
+  top: 416
+swipe: null
+threshold: 0.8
+window_name: free_quee_4

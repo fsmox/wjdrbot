@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 113
-  y: 27
+  x: 120
+  y: 29
 method: check
 picture_path: images/alliance_Step11_window.png
 region:
-  bottom: 39
-  left: 67
-  right: 159
-  top: 16
+  bottom: 41
+  left: 71
+  right: 169
+  top: 17
 swipe: null
 threshold: 0.8
 window_name: alliance_Step11

@@ -1,20 +1,20 @@
 defult_click_point:
-  x: 32
-  y: 423
+  x: 34
+  y: 574
 method: swipe_find
 picture_path: images/warehouse_open.png
 region:
-  bottom: 441
-  left: 16
-  right: 48
-  top: 406
+  bottom: 593
+  left: 17
+  right: 51
+  top: 556
 swipe:
   duration: 500
   end:
-    x: 162
-    y: 300
+    x: 172
+    y: 320
   start:
-    x: 160
-    y: 540
+    x: 170
+    y: 576
 threshold: 0.89
 window_name: warehouse

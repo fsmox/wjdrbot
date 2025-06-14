@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 284
-  y: 444
+  x: 303
+  y: 473
 method: None
 picture_path: images/spear_training_complete_window.png
 region:
-  bottom: 461
-  left: 269
-  right: 300
-  top: 428
+  bottom: 491
+  left: 287
+  right: 320
+  top: 456
 swipe: null
 threshold: 0.8
 window_name: spear_training_complete

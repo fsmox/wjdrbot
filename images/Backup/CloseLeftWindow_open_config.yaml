@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 326
+  y: 388
+method: None
+picture_path: images/CloseLeftWindow_open.png
+region:
+  bottom: 405
+  left: 318
+  right: 335
+  top: 371
+swipe: null
+threshold: 0.8
+window_name: CloseLeftWindow

@@ -1,20 +1,20 @@
 defult_click_point:
-  x: 394
-  y: 640
+  x: 420
+  y: 683
 method: None
 picture_path: images/wood_collection_Step2_window.png
 region:
-  bottom: 677
-  left: 352
-  right: 436
-  top: 604
+  bottom: 722
+  left: 375
+  right: 465
+  top: 644
 swipe:
   duration: 520.0
   end:
-    x: 129
-    y: 643
+    x: 137
+    y: 685
   start:
-    x: 336
-    y: 642
+    x: 358
+    y: 684
 threshold: 0.8
 window_name: wood_collection_Step2

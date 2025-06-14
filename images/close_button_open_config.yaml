@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 449
-  y: 239
+  x: 461
+  y: 85
 method: find
 picture_path: images/close_button_open.png
 region:
-  bottom: 251
-  left: 438
-  right: 461
-  top: 227
+  bottom: 100
+  left: 446
+  right: 476
+  top: 70
 swipe: null
 threshold: 0.8
 window_name: close_button

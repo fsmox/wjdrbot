@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 253
-  y: 381
+  x: 269
+  y: 406
 method: None
 picture_path: images/canned_open.png
 region:
-  bottom: 340
-  left: 199
-  right: 239
-  top: 300
+  bottom: 445
+  left: 236
+  right: 303
+  top: 368
 swipe: null
 threshold: 0.8
 window_name: canned

@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 121
+  y: 29
+method: check
+picture_path: images/alliance_Step16_window.png
+region:
+  bottom: 42
+  left: 71
+  right: 171
+  top: 16
+swipe: null
+threshold: 0.8
+window_name: alliance_Step16

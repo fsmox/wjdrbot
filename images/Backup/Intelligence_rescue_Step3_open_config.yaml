@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 253
+  y: 442
+method: None
+picture_path: images/Intelligence_rescue_Step3_open.png
+region:
+  bottom: 466
+  left: 169
+  right: 337
+  top: 418
+swipe: null
+threshold: 0.8
+window_name: Intelligence_rescue_Step3

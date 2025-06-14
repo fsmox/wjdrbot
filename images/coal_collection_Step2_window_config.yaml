@@ -1,20 +1,20 @@
 defult_click_point:
-  x: 335
-  y: 641
+  x: 392
+  y: 683
 method: find
 picture_path: images/coal_collection_Step2_window.png
 region:
-  bottom: 675
-  left: 293
-  right: 377
-  top: 607
+  bottom: 720
+  left: 347
+  right: 437
+  top: 647
 swipe:
   duration: 440.0
   end:
-    x: 110
-    y: 657
+    x: 117
+    y: 700
   start:
-    x: 286
-    y: 650
+    x: 305
+    y: 693
 threshold: 0.8
 window_name: coal_collection_Step2

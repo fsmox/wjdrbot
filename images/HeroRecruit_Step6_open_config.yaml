@@ -1,12 +1,12 @@
 defult_click_point:
-  x: 30
-  y: 27
+  x: 32
+  y: 29
 method: None
 picture_path: images/HeroRecruit_Step6_open.png
 region:
-  bottom: 48
+  bottom: 51
   left: 7
-  right: 54
+  right: 57
   top: 7
 swipe: null
 threshold: 0.8

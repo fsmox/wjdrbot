@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 386
-  y: 851
+  x: 411
+  y: 907
 method: check
 picture_path: images/collection_Step7_open.png
 region:
-  bottom: 879
-  left: 284
-  right: 488
-  top: 824
+  bottom: 937
+  left: 303
+  right: 520
+  top: 878
 swipe: null
 threshold: 0.8
 window_name: collection_Step7
