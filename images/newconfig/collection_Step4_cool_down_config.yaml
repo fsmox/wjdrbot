@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 379
+  y: 419
+method: ocr
+picture_path: images/collection_Step4_cool_down.png
+region:
+  bottom: 432
+  left: 348
+  right: 410
+  top: 407
+swipe: null
+threshold: 0.8
+window_name: collection_Step4

@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 363
-  y: 658
+  x: 388
+  y: 702
 method: None
 picture_path: images/cure_open.png
 region:
-  bottom: 690
-  left: 295
-  right: 432
-  top: 627
+  bottom: 736
+  left: 315
+  right: 461
+  top: 669
 swipe: null
 threshold: 0.8
 window_name: cure

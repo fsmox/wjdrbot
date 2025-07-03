@@ -9,5 +9,5 @@ region:
   right: 57
   top: 7
 swipe: null
-threshold: 0.8
+threshold: 0.7
 window_name: HeroRecruit_Step5

@@ -1,5 +1,6 @@
 from GlobalConfig import *
 from windows_controller import WindowsController
+from adb_controller import ADBController
 from logger import log,Info,logger
 import cv2
 from datetime import datetime, timedelta
@@ -205,9 +206,9 @@ class TaskResult(Enum):
     CONTINUE = 3
 
 class GameController:
-    def __init__(self, windwow_controller:WindowsController=None):
+    def __init__(self, windwow_controller:ADBController=None):
         if windwow_controller is None:
-            self.windwow_controller = WindowsController()
+            self.windwow_controller = ADBController()
         else:
             self.windwow_controller = windwow_controller
         self.game_state = "initial"
@@ -215,6 +216,7 @@ class GameController:
         self.level = 1
         self.save_images = save_images  # 是否保存图片
         self.save_path = r"C:\SoftDev\wjdrbot_temp_Data\temp"
+        self.auto_join_rally = False
         self.set_game_windows()
 
         self.HeroRecruit_faild_num = 0
@@ -499,37 +501,7 @@ class GameController:
         return self.check_image("images/Zdy_cool_down.png", region, 0.8, notify=True, task_name=task_name, real_time_show=False)
     
 
-    def Task_Alliance(self):
-        cool_time_error = 5*60
-        for i in range(1,19):
-            name = f"alliance_Step{i}"
-            window = self.GetWindow(name)
-            if i==8:
-                alliance_Step8_0 = self.GetWindow("alliance_Step8_0")
-                alliance_Step8_0.open()
-            if window.open():
-                if i== 2:
-                    time.sleep(0.5)
-                    window.windwow_controller.op_after_capture = True
-                elif i == 4:
-                    x , y = window.open_XY
-                    self.windwow_controller.long_press(x , y, 5*1000)
-                elif i==8:
-                    Step9 =f"alliance_Step9"
-                    Step9 = self.GetWindow(Step9)
-                    if not Step9.CurrentWindowIsMe():
-                        for _ in range(20):
-                            if not window.open():
-                                break
-            else:
-                if 8 <= i <= 10:
-                    pass
-                else:
-                    window.ClikReturnButton()
-                    window.ClikReturnButton()
-                    return cool_time_error
-                
-        return 2 * 60 * 60
+ 
         
     
     def Task_AdventureRewards(self):
@@ -694,10 +666,11 @@ class GameController:
             if not window.open():
                 return cool_time_error
         time.sleep(0.5)
-        if stamina_threshold.CurrentWindowIsMe():
-            return 10 * 60
-        else:
-            return 60 * 60
+        return 10 * 60
+        # if stamina_threshold.CurrentWindowIsMe():
+        #     return 10 * 60
+        # else:
+        #     return 60 * 60
        
 
     def Task_collection(self):
@@ -868,25 +841,32 @@ class GameController:
             ("Intelligence_rescue",3),
             ("Intelligence_adventure",5),
         ]
-        finish = True
-        for item in Intelligence_item:
-            Intelligence_window = self.GetWindow("Intelligence_Step1")
-            if not Intelligence_window.open():
-                logger.warning("情报窗口打开失败")
-                self.GoToCity()
-                world.open()
-            else:
-                name = item[0]
-                step_num = item[1]
-                if not self.__Intelligence_sub(name,step_num):
-                    if not Intelligence_window.CurrentWindowIsMe():
-                        logger.warning(f"{name}执行中出错")
-                        self.GoToCity()
-                        world.open()
-                        finish = False
+
+        finish = False
+        exe_error = False
+        for i in range(20):
+            if finish or exe_error:
+                break
+            finish = True
+            for item in Intelligence_item:
+                Intelligence_window = self.GetWindow("Intelligence_Step1")
+                if not Intelligence_window.open():
+                    logger.warning("情报窗口打开失败")
+                    self.GoToCity()
+                    world.open()
                 else:
-                    finish = False
-                    time.sleep(0.5)
+                    name = item[0]
+                    step_num = item[1]
+                    if not self.__Intelligence_sub(name,step_num):
+                        if not Intelligence_window.CurrentWindowIsMe():
+                            logger.warning(f"{name}执行中出错")
+                            self.GoToCity()
+                            world.open()
+                            finish = False
+                            exe_error = True
+                    else:
+                        finish = False
+                        time.sleep(0.5)
         if finish:
             Intelligence_window.ClikReturnButton()
             cool_down = 2 * 60 *60
@@ -1348,7 +1328,7 @@ if __name__ == "__main__":
     # print(game_controller.Task_train_spear())
     # print(game_controller.Task_train_bow())
     # game_controller.GoToCity()
-    game_controller.Task_collection()
+    game_controller.Task_Intelligence()
     # for i in range(20):
     #     re = game_controller.Task_Intelligence()
     #     if re == 4*60*60:

@@ -5,6 +5,8 @@ from apscheduler.triggers.cron import CronTrigger
 from datetime import datetime, timedelta
 import time
 
+from Task_Alliance import Task_Alliance
+
 
 from apscheduler.executors.pool import ThreadPoolExecutor
 
@@ -161,7 +163,7 @@ if __name__ == "__main__":
     from GameController import *
     import tkinter as tk
     from tkinter import ttk
-    
+
 
     
     root = tk.Tk()
@@ -200,7 +202,7 @@ if __name__ == "__main__":
         GoToCxd = None
         exe = task_executor_new(game_controller.Task_WarehouseRewards,after=GoToCxd)
         exe_list.append(exe)
-        exe = task_executor_new(game_controller.Task_Alliance)
+        exe = task_executor_new(Task_Alliance,arg=game_controller)
         exe_list.append(exe)
        
         exe = task_executor_new(game_controller.Task_AdventureRewards)
@@ -213,13 +215,14 @@ if __name__ == "__main__":
         exe_list.append(exe)
         exe = task_executor_new(game_controller.Task_HeroRecruit)
         exe_list.append(exe)
-        exe = task_executor_new(game_controller.Task_RefreshAllianceMobilization)
-        exe_list.append(exe)
+        # exe = task_executor_new(game_controller.Task_RefreshAllianceMobilization)
+        # exe_list.append(exe)
         if user_id == 10:
             exe = task_executor_new(game_controller.Task_AttackIceBeast,after=GoToCxd)
             exe_list.append(exe)
             exe = task_executor_new(game_controller.Task_Intelligence,after=GoToCxd)
             exe_list.append(exe)
+            game_controller.auto_join_rally = True
             
 
     try:

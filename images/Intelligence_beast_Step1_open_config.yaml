@@ -9,5 +9,5 @@ region:
   right: 396
   top: 362
 swipe: null
-threshold: 0.8
+threshold: 0.6
 window_name: Intelligence_beast_Step1

@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 410
-  y: 330
-method: None
+  x: 411
+  y: 331
+method: check
 picture_path: images/collection_Step6_window.png
 region:
-  bottom: 430
-  left: 353
+  bottom: 431
+  left: 355
   right: 467
-  top: 231
+  top: 232
 swipe: null
 threshold: 0.8
 window_name: collection_Step6

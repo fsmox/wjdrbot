@@ -25,9 +25,12 @@ img_h, img_w = img_rgb.shape[:2]
 root = tk.Tk()
 root.title("GUI Block Detector")
 
+root.minsize(width=img_w+350, height=img_h+10)
+root.maxsize(width=img_w+350, height=img_h+10)
+
 # 左侧图像Canvas
 canvas = tk.Canvas(root, width=img_w, height=img_h)
-canvas.grid(row=0, column=0, rowspan=10)
+canvas.grid(row=0, column=0, rowspan=20)
 
 # 显示图像
 tk_img = ImageTk.PhotoImage(Image.fromarray(img_rgb))
@@ -555,7 +558,7 @@ def load_config():
         swipe_time_label[0].grid(row=8, column=2, sticky="w")
 
 load_config_button = tk.Button(root, text="读取config", command=load_config)
-load_config_button.grid(row=11, column=2, sticky="w")
+load_config_button.grid(row=8, column=2, sticky="w")
 
 
 
