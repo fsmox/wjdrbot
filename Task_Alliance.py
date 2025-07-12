@@ -9,6 +9,9 @@ def Task_Alliance(game_controller: GameController):
         if i==8:
             alliance_Step8_0 = game_controller.GetWindow("alliance_Step8_0")
             alliance_Step8_0.open()
+        elif 2<=i<=6: # 2-6是联盟科技
+            if not game_controller.auto_join_rally:
+                continue
         elif 13<=i<=17: # 13-17是加入集结
             if not game_controller.auto_join_rally:
                 continue

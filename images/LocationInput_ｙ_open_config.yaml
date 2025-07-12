@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 385
+  y: 469
+method: None
+picture_path: "images/LocationInput_\uFF59_open.png"
+region:
+  bottom: 479
+  left: 365
+  right: 405
+  top: 459
+swipe: null
+threshold: 0.8
+window_name: "LocationInput_\uFF59"

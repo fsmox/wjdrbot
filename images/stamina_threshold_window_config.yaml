@@ -1,13 +1,13 @@
 defult_click_point:
-  x: 49
-  y: 64
+  x: 36
+  y: 65
 method: check
 picture_path: images/stamina_threshold_window.png
 region:
   bottom: 69
-  left: 44
-  right: 54
-  top: 60
+  left: 31
+  right: 42
+  top: 61
 swipe: null
-threshold: 0.9
+threshold: 0.94
 window_name: stamina_threshold

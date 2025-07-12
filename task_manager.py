@@ -1,5 +1,7 @@
 
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.events import *
+
 
 from apscheduler.triggers.cron import CronTrigger
 from datetime import datetime, timedelta
@@ -10,7 +12,19 @@ from Task_Alliance import Task_Alliance
 
 from apscheduler.executors.pool import ThreadPoolExecutor
 
+
+from GameController import *
+import tkinter as tk
+
 job_name_dic = {}
+
+def get_task_name(task):
+    if hasattr(task, '__name__'):
+        return task.__name__
+    elif hasattr(task, '__class__'):
+        return task.__class__.__name__
+    else:
+        return str(task)
 
 class task_executor:
     def __init__(self,scheduler, task, arg=None,user_id=0,befor=None, after=None):
@@ -91,7 +105,6 @@ class task_executor:
             # jod_id = job.id
             # job_name_dic[jod_id] = self.name
             self.job_count += 1
-            update_task_window()
         self.runtime_list = run_time_list_temp
 
     def schedule_task_now(self):
@@ -99,36 +112,44 @@ class task_executor:
         Schedule the task to run at a specific time.
         """
         # Schedule the task to run every 5 minutes
-        self.set_run_time(0)
+        self.set_run_time(5)
         # self.scheduler.add_job(self.execute_task, trigger='date', run_date=datetime.now(), misfire_grace_time=3600)
     
 from adb_controller import ADBController
 
+class AllTaskController:
+    def __init__(self, scheduler, user_id=0):
+        self.scheduler = scheduler
+        self.user_id = user_id
+        self.tasks = []
+        self.init_tasks()
 
 def get_next_run_times():
     run_times = []
-    for job in scheduler.get_jobs():
-        if job.pending:
-            run_times.append((job.name, "pending"))
-        else:
-            run_times.append((job.name, job.next_run_time))
+    for job in Job_name_cache.values():
+        run_times.append((job["name"], job["next_run_time"]))
+    run_times.sort(key=lambda x: x[1])
     return run_times
 
 def get_current_running_jobs():
 
     running_jobs = []
+    for job in submitted_jobs.values():
+        running_jobs.append((job, "pending"))
     return running_jobs
     for job in scheduler.get_jobs():
         if job.next_run_time and job.next_run_time <= datetime.now():
             running_jobs.append((job.id, "正在执行"))
     return running_jobs
 
-def update_task_window():
+def update_task_tree(tree):
     for row in tree.get_children():
         tree.delete(row)
     run_times = get_next_run_times()
     running_jobs = get_current_running_jobs()
     shown_ids = set()
+    if Executing_job is not None:
+        tree.insert("", "end", values=(Executing_job, "Executing"))
     for job_name, status in running_jobs:
         # job_name = job_name_dic.get(job_id,job_id)
         tree.insert("", "end", values=(job_name, status))
@@ -138,58 +159,21 @@ def update_task_window():
             # job_name = job_name_dic.get(job_id,job_id)
             tree.insert("", "end", values=(job_name, str(next_run)))
             # shown_ids.add(job_id)
-    # for job_id in list(job_name_dic.keys()):
-    #     job_id = str(job_id)
-    #     if scheduler.get_job(job_id) is None:
-    #         del job_name_dic[job_id]
-    # root.after(2000, update_task_window)
 
 
-runtimes = 0
-def TestFunc():
-    print("TestFunc is running")
-    time.sleep(2)
-    print("TestFunc finished")
-
-    global runtimes
-
-    runtimes += 1
-    if runtimes == 1:
-        return [1,2,3,4,5]
-    else:
-        return []
-
-if __name__ == "__main__":
-    from GameController import *
-    import tkinter as tk
-    from tkinter import ttk
-
-
-    
-    root = tk.Tk()
-    root.title("任务下次执行时间")
-    tree = ttk.Treeview(root, columns=("任务ID", "下次执行时间"), show="headings")
-    tree.heading("任务ID", text="任务ID")
-    tree.heading("下次执行时间", text="下次执行时间")
-    tree.pack(fill=tk.BOTH, expand=True)
-
-
-    user_id_list = [0,10,12]
-    Run_num = 1
+def ScheduleAllTask(scheduler,user_id_list=None ):
+    if user_id_list is None:
+        user_id_list = [0, 10, 12]  # Default user IDs if none provided
     exe_list = []
-    executors = {
-    'default': ThreadPoolExecutor(1)  # 限制只能一个任务同时执行
-    }
-    scheduler = BackgroundScheduler(executors=executors)
-    # test = task_executor(scheduler, TestFunc)
 
+    # scheduler = BackgroundScheduler(executors=executors)
 
     for user_id in user_id_list:
         # window_controller = WindowsController()
         window_controller = ADBController(user_id)
         GameController_test = GameController(window_controller)
-        window_controller.active()
-        GameController_test.GoToCity()
+        # window_controller.active()
+        # GameController_test.GoToCity()
 
         task_executor_new = lambda task,**kwargs: task_executor(scheduler,task,befor=window_controller.active, user_id=user_id,**kwargs)
 
@@ -215,9 +199,10 @@ if __name__ == "__main__":
         exe_list.append(exe)
         exe = task_executor_new(game_controller.Task_HeroRecruit)
         exe_list.append(exe)
-        # exe = task_executor_new(game_controller.Task_RefreshAllianceMobilization)
-        # exe_list.append(exe)
+
         if user_id == 10:
+            exe = task_executor_new(game_controller.Task_RefreshAllianceMobilization)
+            exe_list.append(exe)
             exe = task_executor_new(game_controller.Task_AttackIceBeast,after=GoToCxd)
             exe_list.append(exe)
             exe = task_executor_new(game_controller.Task_Intelligence,after=GoToCxd)
@@ -232,18 +217,84 @@ if __name__ == "__main__":
         print("Scheduler stopped.")
         scheduler.shutdown()
 
-    # # 保持运行
-    # try:
-    #     while True:
-    #         pass
-    # except (KeyboardInterrupt, SystemExit):
-    #     scheduler.shutdown()
 
-    # Uncomment the following lines to test the second task
-    # executor_2 = task_executor(test_task_2)
-    # executor_2.start()
+def SetSchedulerAndTaskListWindow():
+    global submitted_jobs
+    global Job_name_cache
+    global Executing_job
+    global scheduler
+    global running_jobs
 
 
 
-    # update_task_window()
+    user_id_list = [0,10,12]
+
+    executors = {
+    'default': ThreadPoolExecutor(1)  # 限制只能一个任务同时执行
+    }
+    scheduler = BackgroundScheduler(executors=executors)
+    
+    
+    submitted_jobs = {}
+    running_jobs = []
+    Job_name_cache = {}
+    Executing_job = None
+
+    def job_listener(event):
+        global running_jobs
+        global Executing_job
+        if event.code == EVENT_JOB_SUBMITTED:
+            job = scheduler.get_job(event.job_id)  # Ensure the job is registered
+            job_name = job.name if job else "Unknown Job"
+            job_name = Job_name_cache.pop(event.job_id,"Unknown Job")["name"]
+            submitted_jobs[event.job_id] = job_name
+            running_jobs.append((event.job_id, job_name))
+            Executing_job = running_jobs[0][1] if running_jobs else None
+        elif event.code in (EVENT_JOB_EXECUTED, EVENT_JOB_ERROR):
+            job = scheduler.get_job(event.job_id)  # Ensure the job is registered
+            job_name = job.name if job else "Unknown Job"
+            if event.job_id in submitted_jobs:
+                del submitted_jobs[event.job_id]
+            running_jobs = [(jid, jname) for jid, jname in running_jobs if jid != event.job_id]
+            Executing_job = running_jobs[0][1] if running_jobs else None
+        elif event.code == EVENT_JOB_REMOVED:
+            job = scheduler.get_job(event.job_id)  # Ensure the job is registered
+
+        elif event.code == EVENT_JOB_ADDED:
+            job = scheduler.get_job(event.job_id)  # Ensure the job is registered
+            job_name = job.name if job else "Unknown Job"
+            next_run_time = job.next_run_time if job else "Unknown Time"
+            Job_name_cache[event.job_id] = {"name":job_name, "next_run_time": next_run_time}
+
+    scheduler.add_listener(job_listener)
+
+    ScheduleAllTask(scheduler, user_id_list)
+
+    return scheduler
+
+
+if __name__ == "__main__":
+
+    
+
+
+    
+    root = tk.Tk()
+    root.title("任务下次执行时间")
+
+    from tkinter import ttk
+    tree = ttk.Treeview(root, columns=("任务ID", "下次执行时间"), show="headings")
+    tree.heading("任务ID", text="任务ID")
+    tree.heading("下次执行时间", text="下次执行时间")
+    tree_pack_opts = {'fill': tk.BOTH, 'expand': True}
+    tree.pack(**tree_pack_opts)
+    SetSchedulerAndTaskListWindow()
+    def refresh_tree():
+        update_task_tree(tree)
+        root.after(1000, refresh_tree)
+
+    refresh_tree()
+
+    
+
     root.mainloop()

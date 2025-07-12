@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 251
+  y: 799
+method: None
+picture_path: images/LocationSearch_open.png
+region:
+  bottom: 813
+  left: 156
+  right: 346
+  top: 786
+swipe: null
+threshold: 0.8
+window_name: LocationSearch

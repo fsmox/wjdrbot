@@ -13,6 +13,8 @@ from enum import Enum
 
 from GameWindow import GameWindow,RegisterWindow
 
+
+
 lock = threading.Lock()
 
 config_base_high = 900
@@ -501,7 +503,9 @@ class GameController:
         return self.check_image("images/Zdy_cool_down.png", region, 0.8, notify=True, task_name=task_name, real_time_show=False)
     
 
- 
+    def Task_Alliance(self):
+        from Task_Alliance import Task_Alliance
+        return Task_Alliance(self)
         
     
     def Task_AdventureRewards(self):

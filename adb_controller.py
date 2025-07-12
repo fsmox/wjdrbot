@@ -26,6 +26,22 @@ class ADBController:
         except subprocess.CalledProcessError:
             raise Exception("窗口激活失败")
         self.set_op()
+    def input_text(self, text):
+        """
+        输入文本到当前活动窗口
+        :param text: 要输入的文本
+        """
+
+        for _ in range(10):
+            subprocess.run(['adb', 'shell', 'input', 'keyevent', '67'])  # 67是删除键
+
+        # 使用adb命令模拟输入文本
+        cmd = ['adb', 'shell', 'input', 'text', text]
+        try:
+            subprocess.run(cmd, check=True)
+            self.set_op()
+        except subprocess.CalledProcessError:
+            raise Exception("文本输入失败，请检查设备连接状态")
     def check_adb_connection(self):
         try:
             cmd = ['adb', 'connect', '127.0.0.1:7555']

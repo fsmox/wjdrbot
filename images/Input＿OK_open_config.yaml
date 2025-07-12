@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 480
+  y: 912
+method: None
+picture_path: "images/Input\uFF3FOK_open.png"
+region:
+  bottom: 924
+  left: 456
+  right: 504
+  top: 900
+swipe: null
+threshold: 0.8
+window_name: "Input\uFF3FOK"

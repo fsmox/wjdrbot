@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 183
+  y: 469
+method: None
+picture_path: images/LocationInput_x_window.png
+region:
+  bottom: 479
+  left: 163
+  right: 204
+  top: 459
+swipe: null
+threshold: 0.8
+window_name: LocationInput_x
