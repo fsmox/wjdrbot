@@ -26,13 +26,13 @@ class ADBController:
         except subprocess.CalledProcessError:
             raise Exception("窗口激活失败")
         self.set_op()
-    def input_text(self, text):
+    def input_text(self, text, del_len=10):
         """
         输入文本到当前活动窗口
         :param text: 要输入的文本
         """
 
-        for _ in range(10):
+        for _ in range(del_len):
             subprocess.run(['adb', 'shell', 'input', 'keyevent', '67'])  # 67是删除键
 
         # 使用adb命令模拟输入文本

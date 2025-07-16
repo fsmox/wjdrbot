@@ -1,6 +1,7 @@
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.events import *
+from apscheduler.schedulers.base import STATE_RUNNING, STATE_PAUSED, STATE_STOPPED
 
 
 from apscheduler.triggers.cron import CronTrigger
@@ -56,6 +57,11 @@ class task_executor:
         """
         Execute the task immediately.
         """
+        if self.scheduler.state == STATE_PAUSED or self.scheduler.state == STATE_STOPPED:
+            log(f"{self.name} 调度器已暂停，设置10s后执行任务")
+            self.set_run_time(10)
+            return
+
         count_down = 5*60
         self.job_count -= 1
         Info(f"{self.name}开始执行")
@@ -86,8 +92,11 @@ class task_executor:
             self.set_run_time(5*60)
         Info(f"{self.name}执行结束")
     def set_run_time(self,run_time):
-        now = datetime.now()
-        next_run_time = now + timedelta(seconds=run_time)
+        if type(run_time) == datetime:
+            next_run_time = run_time
+        else:
+            now = datetime.now()
+            next_run_time = now + timedelta(seconds=run_time)
         run_time_list_temp = []
         min_space = timedelta(hours=1)
         for run_time in self.runtime_list:
@@ -112,7 +121,7 @@ class task_executor:
         Schedule the task to run at a specific time.
         """
         # Schedule the task to run every 5 minutes
-        self.set_run_time(5)
+        self.set_run_time(1)
         # self.scheduler.add_job(self.execute_task, trigger='date', run_date=datetime.now(), misfire_grace_time=3600)
     
 from adb_controller import ADBController
@@ -127,7 +136,8 @@ class AllTaskController:
 def get_next_run_times():
     run_times = []
     for job in Job_name_cache.values():
-        run_times.append((job["name"], job["next_run_time"]))
+        if Executing_job != job["name"]:
+            run_times.append((job["name"], job["next_run_time"]))
     run_times.sort(key=lambda x: x[1])
     return run_times
 
@@ -182,30 +192,39 @@ def ScheduleAllTask(scheduler,user_id_list=None ):
             GoToCxd = None
         else:
             GoToCxd = game_controller.GoToCXD
-
         GoToCxd = None
         exe = task_executor_new(game_controller.Task_WarehouseRewards,after=GoToCxd)
+        game_controller.running_task["Task_WarehouseRewards"] = exe
         exe_list.append(exe)
         exe = task_executor_new(Task_Alliance,arg=game_controller)
+        game_controller.running_task["Task_Alliance"] = exe
         exe_list.append(exe)
        
         exe = task_executor_new(game_controller.Task_AdventureRewards)
+        game_controller.running_task["Task_AdventureRewards"] = exe
         exe_list.append(exe)
         exe = task_executor_new(game_controller.Task_collection,after=GoToCxd)
+        game_controller.running_task["Task_collection"] = exe
         exe_list.append(exe)
         exe = task_executor_new(game_controller.Task_Reconnect)
+        game_controller.running_task["Task_Reconnect"] = exe
         exe_list.append(exe)
         exe = task_executor_new(game_controller.Task_train,after=GoToCxd)
+        game_controller.running_task["Task_train"] = exe
         exe_list.append(exe)
         exe = task_executor_new(game_controller.Task_HeroRecruit)
+        game_controller.running_task["Task_HeroRecruit"] = exe
         exe_list.append(exe)
 
         if user_id == 10:
-            exe = task_executor_new(game_controller.Task_RefreshAllianceMobilization)
-            exe_list.append(exe)
+            # exe = task_executor_new(game_controller.Task_RefreshAllianceMobilization)
+            # game_controller.running_task["Task_RefreshAllianceMobilization"] = exe
+            # exe_list.append(exe)
             exe = task_executor_new(game_controller.Task_AttackIceBeast,after=GoToCxd)
+            game_controller.running_task["Task_AttackIceBeast"] = exe
             exe_list.append(exe)
             exe = task_executor_new(game_controller.Task_Intelligence,after=GoToCxd)
+            game_controller.running_task["Task_Intelligence"] = exe
             exe_list.append(exe)
             game_controller.auto_join_rally = True
             

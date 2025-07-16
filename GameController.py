@@ -221,6 +221,7 @@ class GameController:
         self.auto_join_rally = False
         self.set_game_windows()
 
+        self.running_task = {}
         self.HeroRecruit_faild_num = 0
 
     def set_game_windows(self):
@@ -920,8 +921,7 @@ class GameController:
             self.GoToCity()
 
         if self.HeroRecruit_faild_num > 5:
-            now_time_hour = datetime.now().hour
-            cool_down = (26-now_time_hour) * 60 * 60
+            cool_down = 7 * 60 * 60
         else:
             cool_down = 5*60
 
@@ -962,17 +962,9 @@ class GameController:
         if ((not city.CurrentWindowIsMe()) and 
             (not world.CurrentWindowIsMe())):
             self.GoToCity()
-        if not left_window.CurrentWindowIsMe():
-            left_window.open()
-        if left_window_city.CurrentWindowIsMe():
-            pass
-        elif left_window_world.CurrentWindowIsMe():
-            left_window_city.open()
-        else:
-            pass
         
-        if not left_window_city.CurrentWindowIsMe():
-            log("左侧城市窗口打开失败")
+        if not self.__OpenLeftWinow_City():
+            Info("左侧城市窗口打开失败")
             return False
         
         re = cxd_window.open()
