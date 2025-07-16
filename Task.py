@@ -1,6 +1,7 @@
 from __future__ import annotations
 import yaml
 import datetime
+import os
 class GameTask:
     from GameController import GameController
     def __init__(self, name:str, game_controller:GameController, config_file=None):
@@ -9,7 +10,7 @@ class GameTask:
         self.func = None
         
         if config_file is None:
-            config_file = f"config/{self.name}.yaml"
+            config_file = f"config/{self.name}_{self.game_controller.windwow_controller.user_id}.yaml"
         try:
             with open(config_file, 'r', encoding='utf-8') as f:
                 self.config = yaml.safe_load(f)
@@ -21,10 +22,14 @@ class GameTask:
                 "TodayRunTimes": 0,
                 "TodyRemainingTimes": None,
             }
+        self.config_file = config_file
 
 
     def Before(self):
-        pass
+        if self.game_controller.InReconnectWindow():
+            return False  # 如果在重连窗口中，返回False，表示不执行任务
+        else:
+            return True  # 如果不在重连窗口中，返回True，表示可以执行任务
 
     def exe(self):
         if self.func is None:
@@ -33,7 +38,14 @@ class GameTask:
             return self.func(self.game_controller)
 
     def After(self):
-        pass
+        self.config["TodayRunTimes"] += 1
+        # 更新配置文件
+        
+        config_dir = os.path.dirname(self.config_file)
+        if not os.path.exists(config_dir):
+            os.makedirs(config_dir)
+        with open(self.config_file, 'w', encoding='utf-8') as f:
+            yaml.dump(self.config, f, allow_unicode=True, default_flow_style=False)
 
     def __call__(self):
         now = datetime.datetime.now()

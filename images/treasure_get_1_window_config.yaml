@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 480
+  y: 181
+method: check
+picture_path: images/treasure_get_1_window.png
+region:
+  bottom: 191
+  left: 471
+  right: 490
+  top: 172
+swipe: null
+threshold: 0.8
+window_name: treasure_get_1

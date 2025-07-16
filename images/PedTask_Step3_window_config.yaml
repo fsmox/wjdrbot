@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 121
+  y: 29
+method: check
+picture_path: images/PedTask_Step3_window.png
+region:
+  bottom: 42
+  left: 72
+  right: 170
+  top: 17
+swipe: null
+threshold: 0.8
+window_name: PedTask_Step3

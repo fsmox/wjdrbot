@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 272
+  y: 218
+method: check
+picture_path: images/treasure_complete_window.png
+region:
+  bottom: 231
+  left: 232
+  right: 312
+  top: 206
+swipe: null
+threshold: 0.8
+window_name: treasure_complete

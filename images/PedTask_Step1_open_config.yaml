@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 499
+  y: 718
+method: find
+picture_path: images/PedTask_Step1_open.png
+region:
+  bottom: 738
+  left: 477
+  right: 521
+  top: 699
+swipe: null
+threshold: 0.8
+window_name: PedTask_Step1

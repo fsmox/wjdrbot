@@ -224,6 +224,10 @@ class GameController:
         self.running_task = {}
         self.HeroRecruit_faild_num = 0
 
+        from Task_Ped import Task_Ped
+        self.Task_Ped = Task_Ped(self)
+
+
     def set_game_windows(self):
         GameWindows_test = {
             "city":None,
@@ -250,7 +254,7 @@ class GameController:
             RegisterWindow({window_name: config}, window_controller=self.windwow_controller, GameWindows=self.GameWindows)
             log(f"窗口 {window_name} 注册成功")
         return self.GameWindows[window_name]
-
+    
     def Reconnect(self,task_name=None):
         return self.find_and_click_image(config_reconnect["picture_path"], config_reconnect["threshold"], notify=True, task_name=task_name)
         # 重新连接游戏逻辑
@@ -1061,6 +1065,7 @@ class GameController:
         return cool_down_list
 
 
+
     def GoToCity(self):
         """返回城市"""
 
@@ -1324,7 +1329,7 @@ if __name__ == "__main__":
     # print(game_controller.Task_train_spear())
     # print(game_controller.Task_train_bow())
     # game_controller.GoToCity()
-    game_controller.Task_Intelligence()
+    game_controller.Task_Ped()
     # for i in range(20):
     #     re = game_controller.Task_Intelligence()
     #     if re == 4*60*60:

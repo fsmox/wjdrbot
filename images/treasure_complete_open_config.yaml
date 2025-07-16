@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 512
+  y: 590
+method: find
+picture_path: images/treasure_complete_open.png
+region:
+  bottom: 603
+  left: 498
+  right: 526
+  top: 577
+swipe: null
+threshold: 0.8
+window_name: treasure_complete

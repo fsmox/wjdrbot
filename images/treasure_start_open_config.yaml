@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 270
+  y: 754
+method: check
+picture_path: images/treasure_start_open.png
+region:
+  bottom: 785
+  left: 172
+  right: 368
+  top: 723
+swipe: null
+threshold: 0.8
+window_name: treasure_start
