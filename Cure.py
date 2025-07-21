@@ -1,4 +1,5 @@
 from GameController import *
+from threading import Thread
 
 class CureAssist():
 
@@ -16,6 +17,9 @@ class CureAssist():
             self.cure.windwow_controller.screenshot()
             self.assist2.windwow_controller.screenshot()
             self.assist1.windwow_controller.screenshot()
+        self.run = False
+        self.thread = Thread(target=self.CureAssist, daemon=True)
+        self.thread.start()
 
 
     # def InitAssist(self):
@@ -25,13 +29,24 @@ class CureAssist():
     #     self.assist2.windwow_controller.active()
     #     self.assist2.open()
     def CureAssist(self):
+        frist = True
         cure = self.cure
-        assist1 = self.assist1
-        assist2 = self.assist2
-        cure.windwow_controller.active()
-        cure.open()
-        cure.open()
-        assist1.windwow_controller.active()
-        assist1.open()
-        assist2.windwow_controller.active()
-        assist2.open()
+        while True:
+            if self.run:
+                assist1 = self.assist1
+                assist2 = self.assist2
+                # cure.windwow_controller.active()
+                if frist:
+                    cure.open()
+                    x,y = cure.open_XY
+                    cure.windwow_controller.tap(x,y)
+                cure.windwow_controller.tap(x,y)
+                cure.windwow_controller.tap(x,y)
+            else:
+                time.sleep(1)
+
+        # assist1.windwow_controller.active()
+        # assist1.open()
+        # assist2.windwow_controller.active()
+        # assist2.open()
+    

@@ -227,7 +227,11 @@ def ScheduleAllTask(scheduler,user_id_list=None ):
             game_controller.running_task["Task_Intelligence"] = exe
             exe_list.append(exe)
             game_controller.auto_join_rally = True
-            
+
+        if user_id !=0:
+            exe = task_executor_new(game_controller.Task_Ped,after=GoToCxd)
+            game_controller.running_task["Task_Ped"] = exe
+            exe_list.append(exe)
 
     try:
         print("Scheduler started. Press Ctrl+C to exit.")
@@ -246,7 +250,7 @@ def SetSchedulerAndTaskListWindow():
 
 
 
-    user_id_list = [0,10,12]
+    user_id_list = [10,12,0]
 
     executors = {
     'default': ThreadPoolExecutor(1)  # 限制只能一个任务同时执行

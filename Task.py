@@ -13,7 +13,7 @@ class GameTask:
             config_file = f"config/{self.name}_{self.game_controller.windwow_controller.user_id}.yaml"
         try:
             with open(config_file, 'r', encoding='utf-8') as f:
-                self.config = yaml.safe_load(f)
+                self.config = yaml.load(f, Loader=yaml.Loader)
         except FileNotFoundError:
             print(f"配置文件 {config_file} 未找到，使用默认配置。")
             self.config = {

@@ -120,8 +120,8 @@ class MainWindow(tk.Tk):
         self.CrueAssist_button = tk.Button(global_btn_frame, text="治疗辅助开始", width=12, command=self.global_CrueAssist)
         self.CrueAssist_button.pack(side=tk.LEFT, padx=10)
         
-        # self.CrueAssist = CureAssist()
-        # self.CrueAssist.run = False  # 初始化治疗辅助状态
+        self.CrueAssist = CureAssist()
+        self.CrueAssist.run = False  # 初始化治疗辅助状态
         tk.Button(global_btn_frame, text="预留位", width=12, command=self.global_stop).pack(side=tk.LEFT, padx=10)
         tk.Button(global_btn_frame, text="预留位", width=12, command=self.global_config).pack(side=tk.LEFT, padx=10)
         tk.Button(global_btn_frame, text="预留位", width=12, command=self.quit).pack(side=tk.RIGHT, padx=10)

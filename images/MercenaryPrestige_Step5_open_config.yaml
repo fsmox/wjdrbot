@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 412
+  y: 910
+method: None
+picture_path: images/MercenaryPrestige_Step5_open.png
+region:
+  bottom: 942
+  left: 303
+  right: 521
+  top: 879
+swipe: null
+threshold: 0.8
+window_name: MercenaryPrestige_Step5
