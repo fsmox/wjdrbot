@@ -122,7 +122,11 @@ class MainWindow(tk.Tk):
         
         self.CrueAssist = CureAssist()
         self.CrueAssist.run = False  # 初始化治疗辅助状态
-        tk.Button(global_btn_frame, text="预留位", width=12, command=self.global_stop).pack(side=tk.LEFT, padx=10)
+        self.MercenaryPrestige_button = tk.Button(global_btn_frame, text="佣兵荣耀", width=12, command=self.global_MercenaryPrestige)
+        self.MercenaryPrestige_button.pack(side=tk.LEFT, padx=10)
+        self.MercenaryPrestige_run = False  # 初始化佣兵荣耀状态
+        self.MercenaryPrestige_scheduler = None  # 初始化佣兵荣耀调度器
+
         tk.Button(global_btn_frame, text="预留位", width=12, command=self.global_config).pack(side=tk.LEFT, padx=10)
         tk.Button(global_btn_frame, text="预留位", width=12, command=self.quit).pack(side=tk.RIGHT, padx=10)
 
@@ -200,15 +204,22 @@ class MainWindow(tk.Tk):
             # 这里可以添加实际的治疗辅助逻辑
         self.update_task_info()
 
-    def global_stop(self):
-        self.show_output("全局停止：所有任务停止")
-        for win_name in self.window_names:
-            for idx, task in enumerate(self.window_tasks[win_name]):
-                if task.running:
-                    task.stop()
-                    if task in self.task_buttons:
-                        self.task_buttons[task].config(text="启动")
-        self.update_task_info()
+    def global_MercenaryPrestige(self):
+        if self.MercenaryPrestige_run:
+            self.MercenaryPrestige_run = False
+            self.MercenaryPrestige_scheduler.shutdown(wait=False)
+            self.MercenaryPrestige_scheduler = None
+            self.MercenaryPrestige_button.config(text = "佣兵荣耀")
+            self.show_output("佣兵荣耀已停止")
+        else:
+            self.MercenaryPrestige_run = True
+            self.show_output("佣兵荣耀已开始")
+            # 这里可以添加实际的佣兵荣耀逻辑
+            from Task_MercenaryPrestige import ScehduleMercenaryPrestigeTask
+            scheduler = ScehduleMercenaryPrestigeTask()
+            self.MercenaryPrestige_scheduler = scheduler
+            self.MercenaryPrestige_scheduler.start()
+            self.MercenaryPrestige_button.config(text = "佣兵荣耀停止")
 
     def global_config(self):
         self.show_output("全局配置：请逐个配置任务")

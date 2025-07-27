@@ -193,9 +193,7 @@ def ScheduleAllTask(scheduler,user_id_list=None ):
         else:
             GoToCxd = game_controller.GoToCXD
         GoToCxd = None
-        exe = task_executor_new(game_controller.Task_WarehouseRewards,after=GoToCxd)
-        game_controller.running_task["Task_WarehouseRewards"] = exe
-        exe_list.append(exe)
+
         exe = task_executor_new(Task_Alliance,arg=game_controller)
         game_controller.running_task["Task_Alliance"] = exe
         exe_list.append(exe)
@@ -209,9 +207,8 @@ def ScheduleAllTask(scheduler,user_id_list=None ):
         exe = task_executor_new(game_controller.Task_Reconnect)
         game_controller.running_task["Task_Reconnect"] = exe
         exe_list.append(exe)
-        exe = task_executor_new(game_controller.Task_train,after=GoToCxd)
-        game_controller.running_task["Task_train"] = exe
-        exe_list.append(exe)
+
+
         exe = task_executor_new(game_controller.Task_HeroRecruit)
         game_controller.running_task["Task_HeroRecruit"] = exe
         exe_list.append(exe)
@@ -220,6 +217,12 @@ def ScheduleAllTask(scheduler,user_id_list=None ):
             # exe = task_executor_new(game_controller.Task_RefreshAllianceMobilization)
             # game_controller.running_task["Task_RefreshAllianceMobilization"] = exe
             # exe_list.append(exe)
+            exe = task_executor_new(game_controller.Task_WarehouseRewards,after=GoToCxd)
+            game_controller.running_task["Task_WarehouseRewards"] = exe
+            exe_list.append(exe)
+            exe = task_executor_new(game_controller.Task_train,after=GoToCxd)
+            game_controller.running_task["Task_train"] = exe
+            exe_list.append(exe)
             exe = task_executor_new(game_controller.Task_AttackIceBeast,after=GoToCxd)
             game_controller.running_task["Task_AttackIceBeast"] = exe
             exe_list.append(exe)
