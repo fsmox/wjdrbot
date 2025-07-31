@@ -138,6 +138,7 @@ class GameWindow:
         self.windwow_controller.tap(x,y)
         self.open_XY =(x,y)
         for i in range(Operation_interval):
+            start = time.time()
             log(f"第{i+1}次检查游戏窗口")
             task_found = self.CurrentWindowIsMe(enable_cache=False)
             if i == Operation_interval // 2:
@@ -147,7 +148,10 @@ class GameWindow:
             if task_found:
                 log(f"{self.window_name}窗口已打开")
                 return True
-            # time.sleep(0.5)
+            past = time.time() - start
+            sleep_time = 0.5 - past
+            if sleep_time > 0:
+                time.sleep(sleep_time)
             
         return False
         
