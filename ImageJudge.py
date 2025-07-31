@@ -143,7 +143,8 @@ class ImageJudge:
             if hours >= 0 and minutes >= 0 and minutes < 60 and seconds >= 0 and seconds < 60:
                 total_seconds = hours * 3600 + minutes * 60 + seconds
                 log(f"解析倒计时: {hours}时{minutes}分{seconds}秒，共{total_seconds}秒")
-                self.ChangeFormat(region,self.config,original_screen)
+                if Create_new_config:
+                    self.ChangeFormat(region,self.config,original_screen)
                 return total_seconds
             else:
                 log(f"时间值超出范围: {hours}:{minutes}:{seconds}")

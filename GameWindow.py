@@ -83,15 +83,7 @@ class GameWindow:
         return total_seconds if total_seconds is not None else default_cool_down_time
         # 获取冷却时间的逻辑
 
-    def open(self):
-        # # 打开游戏窗口的逻辑
-        # if not self.CurrentWindowIsFather():
-        #     log("当前窗口不是父窗口，无法打开游戏窗口")
-        #     return False
-
-        if self.open_config is None:
-            raise Exception(f"未配置 {self.window_name} 的 open_config，无法打开窗口")
-
+    def check_open_window(self):
         judge = ImageJudge(self.open_config,f"{self.window_name}_open")
 
         if judge.method == "swipe_check" or judge.method == "swipe_find":
@@ -114,7 +106,19 @@ class GameWindow:
             existed,x,y = judge.Existed(self.windwow_controller.screenshot)
         else:
             existed,x,y = judge.Existed(self.windwow_controller.screenshot)
-        
+
+        return existed, x, y
+    def open(self):
+        # # 打开游戏窗口的逻辑
+        # if not self.CurrentWindowIsFather():
+        #     log("当前窗口不是父窗口，无法打开游戏窗口")
+        #     return False
+
+        if self.open_config is None:
+            raise Exception(f"未配置 {self.window_name} 的 open_config，无法打开窗口")
+
+
+        existed, x, y = self.check_open_window()
         if self.in_window_config is None:
             if existed:
                 self.windwow_controller.tap(x,y)
@@ -136,6 +140,10 @@ class GameWindow:
         for i in range(Operation_interval):
             log(f"第{i+1}次检查游戏窗口")
             task_found = self.CurrentWindowIsMe(enable_cache=False)
+            if i == Operation_interval // 2:
+                existed, x, y = self.check_open_window()
+                if existed:
+                    self.windwow_controller.tap(x,y)
             if task_found:
                 log(f"{self.window_name}窗口已打开")
                 return True

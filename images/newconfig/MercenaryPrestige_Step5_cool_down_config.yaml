@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 423
+  y: 864
+method: ocr
+picture_path: images/MercenaryPrestige_Step5_cool_down.png
+region:
+  bottom: 871
+  left: 391
+  right: 455
+  top: 858
+swipe: null
+threshold: 0.8
+window_name: MercenaryPrestige_Step5

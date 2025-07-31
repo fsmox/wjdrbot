@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 92
+  y: 363
+method: check
+picture_path: images/MercenaryPrestige_Step4_window.png
+region:
+  bottom: 373
+  left: 81
+  right: 103
+  top: 353
+swipe: null
+threshold: 0.8
+window_name: MercenaryPrestige_Step4

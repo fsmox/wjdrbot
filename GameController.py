@@ -221,7 +221,15 @@ class GameController:
         self.auto_join_rally = False
         self.set_game_windows()
 
+        self.running_task = {}
         self.HeroRecruit_faild_num = 0
+
+        from Task_Ped import Task_Ped
+        self.Task_Ped = Task_Ped(self)
+
+        from Task_Collection import Task_Collection
+        self.Task_collection = Task_Collection(self)
+
 
     def set_game_windows(self):
         GameWindows_test = {
@@ -249,7 +257,7 @@ class GameController:
             RegisterWindow({window_name: config}, window_controller=self.windwow_controller, GameWindows=self.GameWindows)
             log(f"窗口 {window_name} 注册成功")
         return self.GameWindows[window_name]
-
+    
     def Reconnect(self,task_name=None):
         return self.find_and_click_image(config_reconnect["picture_path"], config_reconnect["threshold"], notify=True, task_name=task_name)
         # 重新连接游戏逻辑
@@ -677,75 +685,75 @@ class GameController:
         #     return 60 * 60
        
 
-    def Task_collection(self):
+    # def Task_collection(self):
 
-        if self.InReconnectWindow():
-            return 5*60
+    #     if self.InReconnectWindow():
+    #         return 5*60
 
-        collection_type_list = ["meat", "wood", "coal", "iron"]
-        self.GoToCity()
-        cool_time = 5*60
+    #     collection_type_list = ["meat", "wood", "coal", "iron"]
+    #     self.GoToCity()
+    #     cool_time = 5*60
 
-        if not self.__OpenLeftWinow_World():
-            return cool_time
+    #     if not self.__OpenLeftWinow_World():
+    #         return cool_time
 
-        FreeArmyQueueNum = self.__CheckFreeArmyQueueNum()
-        if FreeArmyQueueNum == 0:
-            log("没有空闲行军队列，无法进行采集")
-            return cool_time
+    #     FreeArmyQueueNum = self.__CheckFreeArmyQueueNum()
+    #     if FreeArmyQueueNum == 0:
+    #         log("没有空闲行军队列，无法进行采集")
+    #         return cool_time
         
-        collection_plan_list = []
-        for collection_type in collection_type_list:
-            doing_window = self.GetWindow(f"{collection_type}_collection_doing")
-            if not doing_window.CurrentWindowIsMe():
-                collection_plan_list.append(collection_type)
+    #     collection_plan_list = []
+    #     for collection_type in collection_type_list:
+    #         doing_window = self.GetWindow(f"{collection_type}_collection_doing")
+    #         if not doing_window.CurrentWindowIsMe():
+    #             collection_plan_list.append(collection_type)
         
-        if len(collection_plan_list) > FreeArmyQueueNum:
-            collection_plan_list = random.sample(collection_plan_list, FreeArmyQueueNum)
+    #     if len(collection_plan_list) > FreeArmyQueueNum:
+    #         collection_plan_list = random.sample(collection_plan_list, FreeArmyQueueNum)
         
-        if len(collection_plan_list) == 0:
-            return []
-        log(f"计划采集项目:{collection_plan_list}")
-        cool_time = []
-        GameWindows = self.GameWindows
-        GameWindows["world"].open()
+    #     if len(collection_plan_list) == 0:
+    #         return []
+    #     log(f"计划采集项目:{collection_plan_list}")
+    #     cool_time = []
+    #     GameWindows = self.GameWindows
+    #     GameWindows["world"].open()
         
-        if not "collection_Step7" in GameWindows:
-            collection_window = {}
-            for i in range(1,8):
-                if i == 2:
-                    pass
-                else:
-                    collection_window[f"collection_Step{i}"] = None
-            for collection_type in collection_type_list:
-                collection_window[f"{collection_type}_collection_Step2"] = None
-                collection_window[f"{collection_type}_collection_doing"] = None
-            RegisterWindow(collection_window, window_controller=self.windwow_controller, GameWindows=self.GameWindows)
-        need_run_again = False
-        for collection_type in collection_plan_list:
-            # if self.GetWindow(f"{collection_type}_collection_doing").CurrentWindowIsMe():
-            #     continue
-            for i in range(1,8):
-                if i == 2:
-                    window_name = f"{collection_type}_collection_Step2"
-                else:
-                    window_name = f"collection_Step{i}"
-                if i==4:
-                    cool_time_task = GameWindows[window_name].GetCoolDownTime()
-                    if not cool_time_task is None:
-                        cool_time_task
-                GameWindows[window_name].open()
-                if not GameWindows[window_name].CurrentWindowIsMe():
-                    log(f"{collection_type}采集窗口{window_name}未打开")
-                    self.GoToCity()
-                    GameWindows["world"].open()
-                    need_run_again = True
-                    break
-            else:
-                cool_time.append(cool_time_task)
-        if need_run_again:
-            cool_time.append(5*60)
-        return cool_time
+    #     if not "collection_Step7" in GameWindows:
+    #         collection_window = {}
+    #         for i in range(1,8):
+    #             if i == 2:
+    #                 pass
+    #             else:
+    #                 collection_window[f"collection_Step{i}"] = None
+    #         for collection_type in collection_type_list:
+    #             collection_window[f"{collection_type}_collection_Step2"] = None
+    #             collection_window[f"{collection_type}_collection_doing"] = None
+    #         RegisterWindow(collection_window, window_controller=self.windwow_controller, GameWindows=self.GameWindows)
+    #     need_run_again = False
+    #     for collection_type in collection_plan_list:
+    #         # if self.GetWindow(f"{collection_type}_collection_doing").CurrentWindowIsMe():
+    #         #     continue
+    #         for i in range(1,8):
+    #             if i == 2:
+    #                 window_name = f"{collection_type}_collection_Step2"
+    #             else:
+    #                 window_name = f"collection_Step{i}"
+    #             if i==4:
+    #                 cool_time_task = GameWindows[window_name].GetCoolDownTime()
+    #                 if not cool_time_task is None:
+    #                     cool_time_task
+    #             GameWindows[window_name].open()
+    #             if not GameWindows[window_name].CurrentWindowIsMe():
+    #                 log(f"{collection_type}采集窗口{window_name}未打开")
+    #                 self.GoToCity()
+    #                 GameWindows["world"].open()
+    #                 need_run_again = True
+    #                 break
+    #         else:
+    #             cool_time.append(cool_time_task)
+    #     if need_run_again:
+    #         cool_time.append(5*60ttttttttt666666tttttttttttttttttttttt6o:
+    #     return cool_time
 
     def __left_window_op(self,sub_window_name):
         left_window = self.GetWindow("left_window")
@@ -770,6 +778,13 @@ class GameController:
     def __OpenLeftWinow_World(self):
 
         return self.__left_window_op("left_window_world")
+    def OpenLeftWindow_City(self):
+        return self.__OpenLeftWinow_City()
+    def OpenLeftWindow_World(self):
+        return self.__OpenLeftWinow_World()
+    
+    def GetFreeArmyQueueNum(self):
+        return self.__CheckFreeArmyQueueNum()
     
     def __CheckFreeArmyQueueNum(self):
         window_free_quee_list = [ self.GetWindow(f"free_quee_{i}") for i in range(1,7) ]
@@ -920,8 +935,7 @@ class GameController:
             self.GoToCity()
 
         if self.HeroRecruit_faild_num > 5:
-            now_time_hour = datetime.now().hour
-            cool_down = (26-now_time_hour) * 60 * 60
+            cool_down = 7 * 60 * 60
         else:
             cool_down = 5*60
 
@@ -962,17 +976,9 @@ class GameController:
         if ((not city.CurrentWindowIsMe()) and 
             (not world.CurrentWindowIsMe())):
             self.GoToCity()
-        if not left_window.CurrentWindowIsMe():
-            left_window.open()
-        if left_window_city.CurrentWindowIsMe():
-            pass
-        elif left_window_world.CurrentWindowIsMe():
-            left_window_city.open()
-        else:
-            pass
         
-        if not left_window_city.CurrentWindowIsMe():
-            log("左侧城市窗口打开失败")
+        if not self.__OpenLeftWinow_City():
+            Info("左侧城市窗口打开失败")
             return False
         
         re = cxd_window.open()
@@ -1067,6 +1073,7 @@ class GameController:
         self.__add_cool_dow_time_to_cool_down_list(cool_down_list,cool_down)
         
         return cool_down_list
+
 
 
     def GoToCity(self):
@@ -1332,7 +1339,7 @@ if __name__ == "__main__":
     # print(game_controller.Task_train_spear())
     # print(game_controller.Task_train_bow())
     # game_controller.GoToCity()
-    game_controller.Task_Intelligence()
+    game_controller.Task_Ped()
     # for i in range(20):
     #     re = game_controller.Task_Intelligence()
     #     if re == 4*60*60:

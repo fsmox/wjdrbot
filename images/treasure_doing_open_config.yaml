@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 437
+  y: 591
+method: None
+picture_path: images/treasure_doing_open.png
+region:
+  bottom: 599
+  left: 429
+  right: 445
+  top: 583
+swipe: null
+threshold: 0.8
+window_name: treasure_doing

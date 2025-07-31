@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 480
+  y: 201
+method: check
+picture_path: images/treasure_close_open.png
+region:
+  bottom: 211
+  left: 471
+  right: 490
+  top: 192
+swipe: null
+threshold: 0.8
+window_name: treasure_close

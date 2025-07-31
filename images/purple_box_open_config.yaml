@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 217
+  y: 787
+method: find
+picture_path: images/purple_box_open.png
+region:
+  bottom: 829
+  left: 175
+  right: 259
+  top: 745
+swipe: null
+threshold: 0.8
+window_name: purple_box

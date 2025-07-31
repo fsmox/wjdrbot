@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 217
+  y: 787
+method: find
+picture_path: images/gold_box_open.png
+region:
+  bottom: 819
+  left: 181
+  right: 254
+  top: 755
+swipe: null
+threshold: 0.8
+window_name: gold_box
