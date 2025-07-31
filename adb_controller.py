@@ -44,9 +44,13 @@ class ADBController:
             raise Exception("文本输入失败，请检查设备连接状态")
     def check_adb_connection(self):
         try:
-            cmd = ['adb', 'connect', '127.0.0.1:7555']
-            subprocess.run(cmd, check=True)
             subprocess.run(['adb', 'devices'], check=True)
+            # 如果没有设备连接，尝试连接模拟器
+            result = subprocess.run(['adb', 'devices'], capture_output=True, text=True)
+            if( not 'emulator-5554' in result.stdout and
+                not '127.0.0.1:7555' in result.stdout):
+                cmd = ['adb', 'connect', '127.0.0.1:7555']
+                subprocess.run(cmd, check=True)
             
         except subprocess.CalledProcessError:
             raise Exception("ADB 连接失败，请检查设备连接状态")
