@@ -9,5 +9,5 @@ region:
   right: 55
   top: 8
 swipe: null
-threshold: 0.7
+threshold: 0.5
 window_name: return_button
