@@ -58,7 +58,7 @@ class Task_Collection(GameTask):
                     self.game_controller.GoToCity()
                     world_window.open()
                     need_run_again = True
-                    continue
+                    break
             else:
                 cool_time.append(cool_time_task)
         if need_run_again:
