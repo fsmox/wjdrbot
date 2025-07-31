@@ -9,5 +9,5 @@ region:
   right: 476
   top: 70
 swipe: null
-threshold: 0.8
+threshold: 0.6
 window_name: close_button

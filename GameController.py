@@ -1094,14 +1094,16 @@ class GameController:
         
         # 尝试点击返回按钮
         for i in range(5):
-            city.ClikReturnButton()
-            if city.CurrentWindowIsMe():
-                log("返回城市成功")
-                return True
-            city.open()
-            if city.CurrentWindowIsMe():
-                log("返回城市成功")
-                return True
+            if not city.ClikReturnButton():
+                break
+            time.sleep(1)
+        if city.CurrentWindowIsMe():
+            log("返回城市成功")
+            return True
+        city.open()
+        if city.CurrentWindowIsMe():
+            log("返回城市成功")
+            return True
         
         self.GameWindows["close_button"].open()
         if city.CurrentWindowIsMe():

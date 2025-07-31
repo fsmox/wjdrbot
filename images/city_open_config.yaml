@@ -1,5 +1,5 @@
 defult_click_point:
-  x: 488
+  x: 516
   y: 911
 method: check
 picture_path: images/city_open.png
