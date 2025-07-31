@@ -28,7 +28,8 @@ def get_task_name(task):
         return str(task)
 
 class task_executor:
-    def __init__(self,scheduler, task, arg=None,user_id=0,befor=None, after=None):
+    def __init__(self,scheduler, task, arg=None,user_id=0,befor=None, after=None,
+                 start_time:datetime=None):
 
         self.scheduler = scheduler
         self.befor = befor
@@ -43,7 +44,15 @@ class task_executor:
         self.runtime_list = []
         self.name=self.get_task_name()
         self.name = f"{self.name}_{user_id}"
-        self.schedule_task_now()
+
+        if start_time is None:
+            self.schedule_task_now()
+        
+        else:
+            if start_time < datetime.now():
+                self.schedule_task_now()
+            else:
+                self.set_run_time(start_time)
 
     def get_task_name(self):
         if hasattr(self.task, '__name__'):
@@ -226,6 +235,10 @@ def ScheduleAllTask(scheduler,user_id_list=None ):
             exe = task_executor_new(game_controller.Task_AttackIceBeast,after=GoToCxd)
             game_controller.running_task["Task_AttackIceBeast"] = exe
             exe_list.append(exe)
+            now = datetime.now()
+            now = now + timedelta(days=1)
+            next_day = now.replace(hour=1, minute=10, second=0, microsecond=0)
+            # exe = task_executor_new(game_controller.Task_Intelligence,after=GoToCxd,start_time=next_day)
             exe = task_executor_new(game_controller.Task_Intelligence,after=GoToCxd)
             game_controller.running_task["Task_Intelligence"] = exe
             exe_list.append(exe)
