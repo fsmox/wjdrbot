@@ -38,7 +38,7 @@ class GameWindow:
             in_window_config = yaml.safe_load(f)
             in_window_config["config_file"] = in_window_config_file
         # return_button = GameWindow(window_name, None, in_window_config, None, self.windwow_controller)
-        judge = ImageJudge(in_window_config,f"{self.window_name}_in_window")
+        judge = ImageJudge(in_window_config,f"{window_name}_in_window")
         screenshot = self.windwow_controller.screenshot
         existed,x,y = judge.Existed(screenshot)
         if existed:
