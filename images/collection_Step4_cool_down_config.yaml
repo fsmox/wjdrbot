@@ -5,7 +5,7 @@ method: ocr
 picture_path: images/collection_Step4_cool_down.png
 region:
   bottom: 432
-  left: 348
+  left: 340
   right: 410
   top: 407
 swipe: null

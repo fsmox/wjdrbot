@@ -1079,8 +1079,7 @@ class GameController:
     def GoToCity(self):
         """返回城市"""
 
-        GameWindows = self.GameWindows
-        city = GameWindows["city"]
+        city = self.GetWindow("city")
 
         if city.CurrentWindowIsMe():
             log("已经在城市窗口")
@@ -1092,11 +1091,24 @@ class GameController:
             log("返回城市成功")
             return True
         
+        colloction_window = self.GetWindow("collection_Step1")
+        if not colloction_window is None:
+            if colloction_window.CurrentWindowIsMe():
+                city.windwow_controller.tap(31,28)  # 点击人物头像
+                time.sleep(0.5)
+
+        try_times = 0
         # 尝试点击返回按钮
         for i in range(5):
             if not city.ClikReturnButton():
-                break
-            time.sleep(1)
+                if try_times < 2:
+                    try_times += 1
+                else:
+                    break
+            else:
+                try_times = 0
+
+            time.sleep(0.5)
         if city.CurrentWindowIsMe():
             log("返回城市成功")
             return True
@@ -1105,15 +1117,11 @@ class GameController:
             log("返回城市成功")
             return True
         
-        self.GameWindows["close_button"].open()
+        self.GetWindow("close_button").open()
         if city.CurrentWindowIsMe():
             log("返回城市成功")
             return True
-        
-        colloction_window = self.GetWindow("collection_Step1")
-        if not colloction_window is None:
-            if colloction_window.CurrentWindowIsMe():
-                city.windwow_controller.tap(250,450)
+    
         
         city.open()
         if city.CurrentWindowIsMe():
