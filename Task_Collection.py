@@ -22,7 +22,7 @@ class Task_Collection(GameTask):
 
         FreeArmyQueueNum = self.game_controller.GetFreeArmyQueueNum()
         if FreeArmyQueueNum == 0:
-            log("没有空闲行军队列，无法进行采集")
+            Info("没有空闲行军队列，无法进行采集")
             return cool_time
         
         collection_plan_list = []
@@ -36,7 +36,7 @@ class Task_Collection(GameTask):
         
         if len(collection_plan_list) == 0:
             return []
-        log(f"计划采集项目:{collection_plan_list}")
+        Info(f"计划采集项目:{collection_plan_list}")
         cool_time = []
         world_window = self.game_controller.GetWindow("world")
         world_window.open()
@@ -54,7 +54,7 @@ class Task_Collection(GameTask):
                     cool_time_task = window.GetCoolDownTime()
                 
                 if not window.open():
-                    log(f"{collection_type}采集窗口{window_name}未打开")
+                    Info(f"{collection_type}采集窗口{window_name}未打开")
                     self.game_controller.GoToCity()
                     world_window.open()
                     need_run_again = True
