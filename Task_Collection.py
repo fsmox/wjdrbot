@@ -7,6 +7,7 @@ class Task_Collection(GameTask):
         super().__init__("CollectionTask", game_controller)
         self.collection_window = self.game_controller.GetWindow("collection")
         self.config["collection_count"] = 0  # 初始化收集次数
+        self.bull_on = False  # 是否开启牛车收集
 
     def exe(self):
         collection_type_list = ["meat", "wood", "coal", "iron"]

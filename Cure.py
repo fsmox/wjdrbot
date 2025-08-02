@@ -41,6 +41,7 @@ class CureAssist():
                     x,y = cure.open_XY
                     cure.windwow_controller.tap(x,y)
                 cure.windwow_controller.tap(x,y)
+                time.sleep(0.1)
                 cure.windwow_controller.tap(x,y)
             else:
                 time.sleep(1)

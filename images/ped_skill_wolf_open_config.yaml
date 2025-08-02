@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 209
+  y: 224
+method: check
+picture_path: images/ped_skill_wolf_open.png
+region:
+  bottom: 274
+  left: 159
+  right: 259
+  top: 175
+swipe: null
+threshold: 0.8
+window_name: ped_skill_wolf

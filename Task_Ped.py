@@ -26,12 +26,16 @@ class Task_Ped(GameTask):
             pass
         else:
             self.game_controller.GoToCity()
-        
+        cool_down_list = []
         for i in range(3):
             window = self.game_controller.GetWindow(f"PedTask_Step{i+1}")
             if not window.open():
                 Info("打开兽栏失败")
-                return 5 * 60  # 如果打开兽栏失败，返回冷却时间5分钟
+                cool_down_list.append(5 * 60)  # 如果打开兽栏失败，返回冷却时间5分钟
+                return cool_down_list
+            if i == 0:
+                cool_down_list_t = self.use_skill()
+                cool_down_list.extend(cool_down_list_t)
 
         if self.config.get("TodayRunTimes", 0) == 0:
             today_alliance_treasure = False
@@ -47,17 +51,47 @@ class Task_Ped(GameTask):
         treasure_doing = self.game_controller.GetWindow("treasure_doing")
         if treasure_doing.CurrentWindowIsMe():
             log("当前有派遣寻宝正在进行，等待完成")
-            cool_down = 10 * 60
+            cool_down_list.append(30 * 60)  # 如果有派遣寻宝正在进行，返回冷却时间30分钟
         else:
             cool_down = self.treasure()
+            cool_down_list.append(cool_down)
 
         for i in range(4):
             window.ClikReturnButton()
             time.sleep(0.5)
 
 
-        return cool_down
+        return cool_down_list
 
+    def use_skill(self):
+        def use_skill(skill_name):
+            result = False
+            #点击技能图标
+            skill_window = self.game_controller.GetWindow(f"ped_skill_{skill_name}")
+            use_skill_window = self.game_controller.GetWindow(f"ped_use_skill")
+            reward_window = self.game_controller.GetWindow(f"ped_reward")
+            if skill_window.open():
+                time.sleep(0.5)
+                if use_skill_window.open():
+                    time.sleep(0.5)
+                    reward_window.open()
+                    time.sleep(0.5)
+                    result = True
+            return result
+        cool_down_list = []
+        self.bull_on = use_skill("bull")
+        self.wolf_on = use_skill("wolf")
+        skill_1_used = use_skill("1")
+        skill_2_used = use_skill("2")
+
+        if skill_1_used or self.bull_on or self.wolf_on:
+            cool_down_list.append(23 * 60 * 60)
+        if skill_2_used:
+            cool_down_list.append(39 * 60 * 60)
+
+        return cool_down_list
+
+        
     
     def treasure_complete(self):
         """完成派遣寻宝"""
@@ -144,9 +178,12 @@ class Task_Ped(GameTask):
         self.config["now_treasure_num"] = self.config["now_treasure_num"] + 1
         
         return cool_down
-
-
-
+    
+    def After(self):
+        if self.bull_on:
+            
+        
+        return super().After()
 
 
 if __name__ == "__main__":

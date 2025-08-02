@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 320
+  y: 226
+method: ocr
+picture_path: images/ped_skill_bull_cool_down.png
+region:
+  bottom: 242
+  left: 275
+  right: 366
+  top: 210
+swipe: null
+threshold: 0.8
+window_name: ped_skill_bull

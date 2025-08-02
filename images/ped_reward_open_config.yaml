@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 270
+  y: 886
+method: find
+picture_path: images/ped_reward_open.png
+region:
+  bottom: 897
+  left: 191
+  right: 349
+  top: 875
+swipe: null
+threshold: 0.8
+window_name: ped_reward

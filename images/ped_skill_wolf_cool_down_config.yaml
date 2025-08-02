@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 210
+  y: 227
+method: ocr
+picture_path: images/ped_skill_wolf_cool_down.png
+region:
+  bottom: 244
+  left: 165
+  right: 256
+  top: 210
+swipe: null
+threshold: 0.8
+window_name: ped_skill_wolf

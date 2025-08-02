@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 428
+  y: 224
+method: find
+picture_path: images/ped_skill_1_open.png
+region:
+  bottom: 274
+  left: 378
+  right: 478
+  top: 175
+swipe: null
+threshold: 0.8
+window_name: ped_skill_1
