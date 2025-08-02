@@ -135,10 +135,12 @@ class Task_Ped(GameTask):
     def alliance_treasure(self):
         """领取联盟宝藏"""
         treasure_alliance = self.game_controller.GetWindow("treasure_alliance")
+        treasure_alliance_sub = self.game_controller.GetWindow("treasure_alliance_sub")
         treasure_alliance_get_all = self.game_controller.GetWindow("treasure_alliance_get_all")
         if not treasure_alliance.open():
             Info("打开联盟宝藏窗口失败")
             return False
+        treasure_alliance_sub.open()
         re = True
         if not treasure_alliance_get_all.open():
             Info("打开领取联盟宝藏窗口失败")
