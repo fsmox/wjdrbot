@@ -181,7 +181,8 @@ class Task_Ped(GameTask):
     
     def After(self):
         if self.bull_on:
-            
+            pass
+        #待作业
         
         return super().After()
 
