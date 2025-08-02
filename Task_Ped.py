@@ -41,6 +41,8 @@ class Task_Ped(GameTask):
         else:
             cool_down = self.treasure()
         window.ClikReturnButton()
+        time.sleep(0.5)
+        window.ClikReturnButton()
 
         return cool_down
 
@@ -99,6 +101,8 @@ class Task_Ped(GameTask):
             return 5 * 60
         
         if not self.treasure_dispatch_window.open():
+            task.treasure_close.open()
+            task.treasure_close.open()
             Info("打开派遣寻宝窗口失败")
             return 5 * 60
 
@@ -117,3 +121,11 @@ class Task_Ped(GameTask):
 
 
 
+
+if __name__ == "__main__":
+    from GameController import GameController
+    game_controller = GameController()
+    task = Task_Ped(game_controller)
+    task.exe()
+    # task.treasure_close.open()
+    print("任务执行完毕")

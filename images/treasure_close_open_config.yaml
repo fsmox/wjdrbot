@@ -1,7 +1,7 @@
 defult_click_point:
   x: 480
   y: 201
-method: check
+method: find
 picture_path: images/treasure_close_open.png
 region:
   bottom: 211
