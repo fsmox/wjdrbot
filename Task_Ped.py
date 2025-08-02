@@ -33,6 +33,16 @@ class Task_Ped(GameTask):
                 Info("打开兽栏失败")
                 return 5 * 60  # 如果打开兽栏失败，返回冷却时间5分钟
 
+        if self.config.get("TodayRunTimes", 0) == 0:
+            today_alliance_treasure = False
+        else:
+            today_alliance_treasure = self.config.get("today_alliance_treasure", False)
+        
+        if not today_alliance_treasure:
+            if self.alliance_treasure():
+                today_alliance_treasure = True
+            self.config["today_alliance_treasure"] = today_alliance_treasure
+
         self.treasure_complete()
         treasure_doing = self.game_controller.GetWindow("treasure_doing")
         if treasure_doing.CurrentWindowIsMe():
@@ -40,9 +50,11 @@ class Task_Ped(GameTask):
             cool_down = 10 * 60
         else:
             cool_down = self.treasure()
-        window.ClikReturnButton()
-        time.sleep(0.5)
-        window.ClikReturnButton()
+
+        for i in range(4):
+            window.ClikReturnButton()
+            time.sleep(0.5)
+
 
         return cool_down
 
@@ -84,7 +96,22 @@ class Task_Ped(GameTask):
             Info("打开领取奖励窗口失败")
 
         return True
+    
+    #领取联盟宝藏
+    def alliance_treasure(self):
+        """领取联盟宝藏"""
+        treasure_alliance = self.game_controller.GetWindow("treasure_alliance")
+        treasure_alliance_get_all = self.game_controller.GetWindow("treasure_alliance_get_all")
+        if not treasure_alliance.open():
+            Info("打开联盟宝藏窗口失败")
+            return False
+        re = True
+        if not treasure_alliance_get_all.open():
+            Info("打开领取联盟宝藏窗口失败")
+            re =  False
+        self.treasure_close.open()
 
+        return re
 
     def treasure(self):
         if self.gold_box_window.open():
@@ -101,8 +128,8 @@ class Task_Ped(GameTask):
             return 5 * 60
         
         if not self.treasure_dispatch_window.open():
-            task.treasure_close.open()
-            task.treasure_close.open()
+            self.treasure_close.open()
+            self.treasure_close.open()
             Info("打开派遣寻宝窗口失败")
             return 5 * 60
 
@@ -126,6 +153,6 @@ if __name__ == "__main__":
     from GameController import GameController
     game_controller = GameController()
     task = Task_Ped(game_controller)
-    task.exe()
+    task()
     # task.treasure_close.open()
     print("任务执行完毕")

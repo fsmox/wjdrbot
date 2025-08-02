@@ -1,0 +1,13 @@
+defult_click_point:
+  x: 270
+  y: 115
+method: check
+picture_path: images/treasure_alliance_window.png
+region:
+  bottom: 127
+  left: 225
+  right: 316
+  top: 104
+swipe: null
+threshold: 0.8
+window_name: treasure_alliance
